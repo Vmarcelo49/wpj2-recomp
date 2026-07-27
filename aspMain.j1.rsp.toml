@@ -1,0 +1,12 @@
+# WPJ2 aspMain RSPRecomp Configuration
+# SDK 2.0 aspMain IMEM base is 0x04001080 (NOT 0x04001000 - Thiago's critical discovery!)
+
+text_offset = 0xD9BB0
+text_size = 0xE20
+text_address = 0x04001080
+rom_file_path = "input/wpj2.j1.z64"
+output_file_path = "src/rsp/generated/aspMain.c"
+output_function_name = "aspMain"
+
+# No overlay slots for aspMain (single microcode)
+overlay_slots = []
