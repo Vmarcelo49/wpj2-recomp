@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/marcelo/projects/WPJ2-recomp/build_tools/cmake_install.cmake",
-		"/home/marcelo/projects/WPJ2-recomp/build_tools/lib/fmt/cmake_install.cmake",
-		"/home/marcelo/projects/WPJ2-recomp/build_tools/lib/tomlplusplus/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
