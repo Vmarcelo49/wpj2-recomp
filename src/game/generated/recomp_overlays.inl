@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "shims.h"
 #include "funcs.h"
 #include "librecomp/sections.h"
 

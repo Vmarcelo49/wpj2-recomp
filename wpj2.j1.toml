@@ -12,7 +12,8 @@ use_absolute_symbols = false
 functions_per_output_file = 50
 unpaired_lo16_warnings = true
 use_mdebug = false
-recomp_include = '#include "recomp.h"'
+recomp_include = '''#include "recomp.h"
+#include "shims.h"'''
 trace_mode = false
 allow_exports = false
 strict_patch_mode = false
@@ -21,6 +22,7 @@ relocatable_sections_path = ""
 symbols_file_path = ""
 rom_file_path = ""
 output_binary_path = ""
+
 manual_funcs = []
 function_sizes = []
 

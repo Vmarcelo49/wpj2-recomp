@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "shims.h"
 #include "funcs.h"
 
 RECOMP_FUNC void func_800731C0(uint8_t* rdram, recomp_context* ctx) {

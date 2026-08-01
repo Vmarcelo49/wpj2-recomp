@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "shims.h"
 #include "funcs.h"
 
 RECOMP_FUNC void Thread_ResetMqValidCount(uint8_t* rdram, recomp_context* ctx) {

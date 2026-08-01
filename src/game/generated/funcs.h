@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "shims.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "shims.h"
 
 gpr get_entrypoint_address() { return (gpr)(int32_t)0x80000400u; }
 
