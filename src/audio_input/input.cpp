@@ -18,10 +18,6 @@ namespace {
     // bit 13: Z          bit 12: Start
     // bit 11: U  bit 10: D  bit 9: L  bit 8: R  (D-pad)
     // bits 7..0: C-pad + reserved (C-up=0x20, C-down=0x10, C-left=0x08, C-right=0x04)
-    // We just match the constants used by libultra / recomp:
-    // 0x8000=A, 0x4000=B, 0x2000=Z, 0x1000=Start,
-    // 0x0800=DU, 0x0400=DD, 0x0200=DL, 0x0100=DR
-    // (C-buttons usually 0x0020..0x0008, unused by WPJ2 main gameplay.)
     constexpr uint16_t BTN_A      = 0x8000;
     constexpr uint16_t BTN_B      = 0x4000;
     constexpr uint16_t BTN_Z      = 0x2000;
@@ -72,6 +68,38 @@ namespace {
         *x = sx * INV;
         *y = sy * INV;
     }
+
+    // Track which joystick indices are already assigned to avoid opening
+    // the same physical device multiple times (common with wireless dongles
+    // that expose multiple HID interfaces).
+    int find_first_free_controller() {
+        int n = SDL_NumJoysticks();
+        for (int j = 0; j < n; j++) {
+            if (!SDL_IsGameController(j)) continue;
+
+            // Check if this joystick index is already opened in any slot
+            bool already_open = false;
+            for (int k = 0; k < 4; k++) {
+                if (g_pads[k] == nullptr) continue;
+                SDL_Joystick* opened_joy = SDL_GameControllerGetJoystick(g_pads[k]);
+                if (opened_joy != nullptr) {
+                    SDL_JoystickID opened_id = SDL_JoystickInstanceID(opened_joy);
+                    // SDL_JoystickGetDeviceInstanceID returns the instance ID
+                    // that a joystick WOULD get if opened. Compare to see if
+                    // this device is already open.
+                    SDL_JoystickID device_id = SDL_JoystickGetDeviceInstanceID(j);
+                    if (device_id == opened_id) {
+                        already_open = true;
+                        break;
+                    }
+                }
+            }
+            if (!already_open) {
+                return j;
+            }
+        }
+        return -1;
+    }
 }
 
 void input_poll() {
@@ -86,23 +114,12 @@ void input_poll() {
                 g_pads[i] = nullptr;
             }
         } else {
-            // Find first unattached joystick that is a game controller
-            int n = SDL_NumJoysticks();
-            for (int j = 0; j < n; j++) {
-                bool used = false;
-                for (int k = 0; k < 4; k++) {
-                    if (g_pads[k] != nullptr && SDL_JoystickGetDeviceGUID(j).data == SDL_JoystickGetGUID(SDL_GameControllerGetJoystick(g_pads[k])).data) {
-                        used = true;
-                        break;
-                    }
-                }
-                if (!used && SDL_IsGameController(j)) {
-                    g_pads[i] = SDL_GameControllerOpen(j);
-                    if (g_pads[i] != nullptr) {
-                        fprintf(stderr, "[WPJ2/Input] P%d: opened '%s'\n",
-                                i + 1, SDL_GameControllerName(g_pads[i]));
-                    }
-                    break;
+            int j = find_first_free_controller();
+            if (j >= 0) {
+                g_pads[i] = SDL_GameControllerOpen(j);
+                if (g_pads[i] != nullptr) {
+                    fprintf(stderr, "[WPJ2/Input] P%d: opened '%s' (joystick %d)\n",
+                            i + 1, SDL_GameControllerName(g_pads[i]), j);
                 }
             }
         }
