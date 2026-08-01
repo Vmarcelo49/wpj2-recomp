@@ -28,5 +28,21 @@ Thumbs.db
 # Logs
 *.log
 
+# ROM files (never commit copyrighted game data)
+input/*.z64
+input/*.n64
+input/*.v64
+*.z64
+*.n64
+*.v64
+
+# ELF / binary dumps
+*.elf
+tools/input/*.elf
+
+# Core dumps
+core
+core.*
+
 # Local config (keep wpj2.j1.toml tracked, but ignore local overrides)
 *.local.toml
