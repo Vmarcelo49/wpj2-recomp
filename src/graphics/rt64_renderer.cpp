@@ -221,7 +221,8 @@ void RT64RendererContext::send_dl(const OSTask* task) {
     // The display list is in RDRAM at task->t.data_ptr (virtual address).
     // RT64's processDisplayLists expects the RDRAM-relative byte offset.
     // In recomp mode, virtual address 0x80XXXXXX maps to RDRAM offset
-    // (vaddr - 0x80000000).
+    // (vaddr - 0x80000000). RT64's loadUCodeGBI masks with 0xFFFFF8 which
+    // also strips the 0x80 prefix, so we can pass the raw virtual address.
     uint32_t dl_start = (uint32_t)task->t.data_ptr - 0x80000000;
     uint32_t dl_end = dl_start + task->t.data_size;
 
@@ -230,9 +231,20 @@ void RT64RendererContext::send_dl(const OSTask* task) {
                 (unsigned long)n, task->t.type, dl_start, dl_end, task->t.data_size);
     }
 
+    // Tell RT64 which GBI (F3D/F3DEX/F3DEX2) to use by reading the ucode
+    // data from RDRAM. RT64 hashes the ucode to identify the microcode type.
+    // Without this, hleGBI is null and the HLE display list parser crashes.
+    // loadUCodeGBI is idempotent — it only re-detects when the ucode changes.
+    uint32_t ucode_addr = (uint32_t)task->t.ucode;
+    uint32_t ucode_data_addr = (uint32_t)task->t.ucode_data;
+    pimpl_->app->interpreter->loadUCodeGBI(ucode_addr, ucode_data_addr, true);
+
     // processDisplayLists(memory, dlStartAddress, dlEndAddress, isHLE)
-    // isHLE=false means we're passing RDP display lists (not HLE-interpreted RSP).
-    pimpl_->app->processDisplayLists(pimpl_->rdram, dl_start, dl_end, false);
+    // isHLE=true: RT64 interprets GBI display list commands (F3D/F3DEX2)
+    // isHLE=false: RT64 interprets raw RDP commands (NOT what we want —
+    //   the RSP graphics microcode is not recompiled, so the display list
+    //   is still in GBI format, not RDP format)
+    pimpl_->app->processDisplayLists(pimpl_->rdram, dl_start, dl_end, true);
 }
 
 void RT64RendererContext::update_screen() {
