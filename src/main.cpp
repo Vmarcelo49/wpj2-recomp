@@ -138,6 +138,10 @@ int main(int argc, char** argv) {
     printf("Entry point: 0x%08lX\n", (unsigned long)get_entrypoint_address());
 
     // ---- 1. SDL2 init ----
+    // On Wayland sessions, SDL2 may default to X11 (via XWayland) which causes
+    // Vulkan surface creation to fail (missing VK_KHR_wayland_surface extension).
+    // Force SDL2 to try Wayland first, then fall back to X11.
+    SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland,x11");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         return EXIT_FAILURE;

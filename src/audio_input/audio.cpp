@@ -1,15 +1,14 @@
 /*
  * WPJ2 Recomp - SDL2 Audio Backend implementation
  *
- * Uses SDL2's queue-based audio API. The game queues audio frames via
- * osAiSetNextBuffer_recomp -> ultramodern::queue_audio_buffer -> our
- * audio_queue_samples. We report remaining capacity via audio_get_frames_remaining
- * so the game knows when to queue more.
+ * Uses SDL2's queue-based audio API.
  *
- * Buffer sizing: we use ~50ms of buffer (3 frames at 60Hz) to avoid underruns
- * that cause crackling. The game-side AI DMA typically queues ~1 frame (16ms)
- * at a time, so having 3x headroom prevents the SDL queue from emptying
- * between game audio updates.
+ * IMPORTANT: ultramodern's queue_samples callback receives (int16_t* samples, size_t count)
+ * where `count` is the TOTAL number of int16_t samples (L+R combined), NOT the number
+ * of stereo frames. For stereo audio, 1 frame = 2 samples.
+ *
+ * get_frames_remaining must return the number of STEREO FRAMES remaining (not samples).
+ * ultramodern multiplies this by 2*sizeof(int16_t) to get bytes.
  */
 
 #include "audio.hpp"
@@ -20,6 +19,7 @@
 #include <cstring>
 #include <mutex>
 #include <atomic>
+#include <algorithm>
 
 namespace wpj2 {
 
@@ -44,8 +44,6 @@ namespace {
     }
 
     // Maximum queued audio before we start dropping (150ms).
-    // This prevents unbounded latency if the game queues faster than
-    // the hardware plays. 150ms gives 3x our buffer headroom.
     size_t max_queued_bytes() {
         return (size_t)(g_spec.freq * g_spec.channels * sizeof(int16_t)) * 3 / 20; // 150ms
     }
@@ -90,19 +88,17 @@ void audio_set_frequency(uint32_t freq) {
 
 void audio_queue_samples(int16_t* samples, size_t count) {
     if (!g_initialized) return;
-    // count is in sample frames; SDL_QueueAudio expects bytes.
-    size_t bytes = count * g_spec.channels * sizeof(int16_t);
 
-    // If the queue is already at max capacity, drop the OLDEST samples by
-    // dequeuing them, then queue the new ones. This prevents the game from
-    // stalling on audio (which would cause a boot park) while keeping
-    // latency bounded.
+    // count is the TOTAL number of int16_t samples (L+R combined).
+    // For stereo: bytes = count * sizeof(int16_t)
+    // (NOT count * channels * sizeof(int16_t) — that would double the data!)
+    size_t bytes = count * sizeof(int16_t);
+
+    // If the queue is over capacity, dequeue oldest samples to make room.
     size_t current = SDL_GetQueuedAudioSize(g_device);
     size_t max_bytes = max_queued_bytes();
     if (current + bytes > max_bytes) {
-        // Drop enough old samples to make room
         size_t excess = (current + bytes) - max_bytes;
-        // SDL_DequeueAudio consumes from the front (oldest) of the queue
         static thread_local uint8_t drop_buf[8192];
         while (excess > 0) {
             size_t to_read = std::min(excess, sizeof(drop_buf));
@@ -117,13 +113,13 @@ void audio_queue_samples(int16_t* samples, size_t count) {
 }
 
 size_t audio_get_frames_remaining() {
-    if (!g_initialized) return 2048; // dummy
+    if (!g_initialized) return 2048;
+
     Uint32 queued = SDL_GetQueuedAudioSize(g_device);
-    size_t bytes_per_frame = g_spec.channels * sizeof(int16_t);
+    size_t bytes_per_frame = g_spec.channels * sizeof(int16_t); // 4 bytes per stereo frame
     size_t queued_frames = queued / bytes_per_frame;
 
-    // Report how many more frames we can accept before hitting the cap.
-    // The game uses this to decide if it should queue more audio.
+    // Report remaining FRAMES (not samples) before hitting the cap.
     size_t max_frames = max_queued_bytes() / bytes_per_frame;
     if (queued_frames >= max_frames) return 0;
     return max_frames - queued_frames;
