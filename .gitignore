@@ -1,0 +1,31 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.gch
+
+# IDE
+.vscode/
+.idea/
+.cache/
+.clangd
+compile_commands.json
+
+# ccache
+.ccache/
+
+# Editor backup
+*~
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local config (keep wpj2.j1.toml tracked, but ignore local overrides)
+*.local.toml
