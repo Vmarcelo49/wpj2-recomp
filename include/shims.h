@@ -69,6 +69,16 @@ void osWritebackDCache_recomp(uint8_t* rdram, recomp_context* ctx);
 // Memory conversion
 void osVirtualToPhysical_recomp(uint8_t* rdram, recomp_context* ctx);
 
+// Internal libultra functions referenced by the recompilation.
+// These are NOT part of the public libultra API but are called by the
+// game's own libultra copy. Stubs return PFS_ERR_NOPACK / null context.
+void __osViGetCurrentContext_recomp(uint8_t* rdram, recomp_context* ctx);
+void __osViSwapContext_recomp(uint8_t* rdram, recomp_context* ctx);
+void __osTimerInterrupt_recomp(uint8_t* rdram, recomp_context* ctx);
+void __osPfsRWInode_recomp(uint8_t* rdram, recomp_context* ctx);
+void __osContAddressCrc_recomp(uint8_t* rdram, recomp_context* ctx);
+void __osContDataCrc_recomp(uint8_t* rdram, recomp_context* ctx);
+
 #ifdef __cplusplus
 }
 #endif

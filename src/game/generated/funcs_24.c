@@ -1422,7 +1422,7 @@ L_800BF7B8:
     // 0x800BF7CC: jal         0x800C00A4
     // 0x800BF7D0: subu        $a1, $t2, $t3
     ctx->r5 = SUB32(ctx->r10, ctx->r11);
-    static_5_800C00A4(rdram, ctx);
+    func_800C00A4(rdram, ctx);
         goto after_0;
     // 0x800BF7D0: subu        $a1, $t2, $t3
     ctx->r5 = SUB32(ctx->r10, ctx->r11);

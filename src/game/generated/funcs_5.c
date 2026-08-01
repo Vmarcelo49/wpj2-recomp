@@ -3730,7 +3730,7 @@ L_800CA4BC:
     // 0x800CA4C8: jal         0x800CA320
     // 0x800CA4CC: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_0;
     // 0x800CA4CC: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3752,7 +3752,7 @@ L_800CA4BC:
     // 0x800CA4E4: jal         0x800CA320
     // 0x800CA4E8: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_1;
     // 0x800CA4E8: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3782,7 +3782,7 @@ L_800CA4BC:
     // 0x800CA510: jal         0x800CA320
     // 0x800CA514: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_2;
     // 0x800CA514: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3794,7 +3794,7 @@ L_800CA4BC:
     // 0x800CA520: jal         0x800CA320
     // 0x800CA524: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_3;
     // 0x800CA524: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3806,7 +3806,7 @@ L_800CA4BC:
     // 0x800CA530: jal         0x800CA320
     // 0x800CA534: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_4;
     // 0x800CA534: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3881,7 +3881,7 @@ L_800CA588:
     // 0x800CA590: jal         0x800CA320
     // 0x800CA594: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_5;
     // 0x800CA594: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -3891,7 +3891,7 @@ L_800CA588:
     // 0x800CA59C: jal         0x800CA320
     // 0x800CA5A0: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_6;
     // 0x800CA5A0: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -4018,7 +4018,7 @@ L_800CA644:
     // 0x800CA65C: jal         0x800CA320
     // 0x800CA660: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_7;
     // 0x800CA660: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
@@ -4068,7 +4068,7 @@ L_800CA684:
     // 0x800CA6A0: jal         0x800CA320
     // 0x800CA6A4: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;
-    static_5_800CA320(rdram, ctx);
+    func_800CA320(rdram, ctx);
         goto after_8;
     // 0x800CA6A4: or          $a1, $t3, $zero
     ctx->r5 = ctx->r11 | 0;

@@ -64,3 +64,36 @@ extern "C" void osUnlockMutex_recomp(uint8_t* rdram, recomp_context* ctx) {
     (void)rdram;
     (void)ctx;
 }
+
+// Additional internal functions referenced by the recompilation but not
+// implemented by librecomp. These are osInternal* helpers used by the
+// game's libultra — stub them as no-ops so the game can boot.
+extern "C" void __osViGetCurrentContext_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    ctx->r2 = 0; // return null context
+}
+
+extern "C" void __osViSwapContext_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    (void)ctx;
+}
+
+extern "C" void __osTimerInterrupt_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    (void)ctx;
+}
+
+extern "C" void __osPfsRWInode_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    ctx->r2 = 1; // PFS_ERR_NOPACK
+}
+
+extern "C" void __osContAddressCrc_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    ctx->r2 = 0; // CRC result (stub)
+}
+
+extern "C" void __osContDataCrc_recomp(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    ctx->r2 = 0; // CRC result (stub)
+}

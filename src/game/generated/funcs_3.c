@@ -1999,7 +1999,7 @@ L_800D0974:
     // 0x800D09AC: jal         0x800D0750
     // 0x800D09B0: or          $s6, $a0, $zero
     ctx->r22 = ctx->r4 | 0;
-    static_5_800D0750(rdram, ctx);
+    func_800D0750(rdram, ctx);
         goto after_0;
     // 0x800D09B0: or          $s6, $a0, $zero
     ctx->r22 = ctx->r4 | 0;
@@ -2198,7 +2198,7 @@ L_800D0AB4:
     // 0x800D0AEC: jal         0x800D0750
     // 0x800D0AF0: or          $s6, $a0, $zero
     ctx->r22 = ctx->r4 | 0;
-    static_5_800D0750(rdram, ctx);
+    func_800D0750(rdram, ctx);
         goto after_1;
     // 0x800D0AF0: or          $s6, $a0, $zero
     ctx->r22 = ctx->r4 | 0;
@@ -2374,7 +2374,7 @@ L_800D0BD4:
     // 0x800D0C18: jal         0x800D0750
     // 0x800D0C1C: or          $s3, $zero, $zero
     ctx->r19 = 0 | 0;
-    static_5_800D0750(rdram, ctx);
+    func_800D0750(rdram, ctx);
         goto after_2;
     // 0x800D0C1C: or          $s3, $zero, $zero
     ctx->r19 = 0 | 0;

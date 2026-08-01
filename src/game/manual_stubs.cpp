@@ -1,0 +1,115 @@
+
+/* Auto-generated stubs for functions that N64Recomp could not recompile
+ * (they reference data interpreted as INVALID MIPS instructions).
+ * Each stub does nothing and returns 0 — game behavior may be affected,
+ * but this unblocks the linker so we can proceed with boot park debugging.
+ */
+
+#include "recomp.h"
+#include "shims.h"
+
+extern "C" void func_800C82DC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C8528(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C85A0(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C975C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C9774(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C97CC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C9840(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C9F48(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800C9FEC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA044(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA0A8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA108(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA168(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA1D4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CA320(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CAC94(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CACD4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CAD14(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CAD8C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CB07C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CB08C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CB598(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CB838(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CB938(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CBA18(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CBA5C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CBBAC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CBBBC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CC00C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CC36C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CCC68(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CCC7C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CCF84(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD004(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD01C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD054(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD0EC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD11C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD14C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD4E4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CD59C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CE3B8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CE574(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CE7B0(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CF5D4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CF748(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CF808(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800CFFDC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D0078(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D0750(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D0D1C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D1014(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D1214(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D1C74(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D1D88(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D1FC8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D2158(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D252C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D27CC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D3904(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D3D18(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D3E6C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D3EF4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4128(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4214(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D42A4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4344(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D43DC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D443C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D44EC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4564(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D45C8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4624(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D46CC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D4F94(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D54FC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D552C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D56CC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D631C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D6394(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D63E0(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D6868(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D6ABC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D6B18(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800D6B6C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800E8CB0(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECBF5(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECC14(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECC24(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECC59(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECC65(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECC80(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECCEC(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECCF4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECD18(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ECD25(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ED024(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800ED140(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void func_800EF790(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800C82F0(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800CA3E4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800D13E4(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800D167C(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800D63E8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }
+extern "C" void static_5_800D68B8(uint8_t* rdram, recomp_context* ctx) { (void)rdram; (void)ctx; }

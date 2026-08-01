@@ -4995,7 +4995,7 @@ RECOMP_FUNC void alSeqNew(uint8_t* rdram, recomp_context* ctx) {
     // 0x800D6904: jal         0x800D6868
     // 0x800D6908: sw          $a1, 0x8($a0)
     MEM_W(0X8, ctx->r4) = ctx->r5;
-    static_5_800D6868(rdram, ctx);
+    func_800D6868(rdram, ctx);
         goto after_0;
     // 0x800D6908: sw          $a1, 0x8($a0)
     MEM_W(0X8, ctx->r4) = ctx->r5;
@@ -5017,7 +5017,7 @@ RECOMP_FUNC void alSeqNew(uint8_t* rdram, recomp_context* ctx) {
     // 0x800D691C: jal         0x800D6868
     // 0x800D6920: or          $a0, $a3, $zero
     ctx->r4 = ctx->r7 | 0;
-    static_5_800D6868(rdram, ctx);
+    func_800D6868(rdram, ctx);
         goto after_1;
     // 0x800D6920: or          $a0, $a3, $zero
     ctx->r4 = ctx->r7 | 0;
@@ -5117,7 +5117,7 @@ RECOMP_FUNC void alSeqNew(uint8_t* rdram, recomp_context* ctx) {
     // 0x800D6988: jal         0x800D6868
     // 0x800D698C: swc1        $f8, 0x14($a3)
     MEM_W(0X14, ctx->r7) = ctx->f8.u32l;
-    static_5_800D6868(rdram, ctx);
+    func_800D6868(rdram, ctx);
         goto after_5;
     // 0x800D698C: swc1        $f8, 0x14($a3)
     MEM_W(0X14, ctx->r7) = ctx->f8.u32l;
@@ -5139,7 +5139,7 @@ RECOMP_FUNC void alSeqNew(uint8_t* rdram, recomp_context* ctx) {
     // 0x800D69A0: jal         0x800D6868
     // 0x800D69A4: or          $a0, $a3, $zero
     ctx->r4 = ctx->r7 | 0;
-    static_5_800D6868(rdram, ctx);
+    func_800D6868(rdram, ctx);
         goto after_6;
     // 0x800D69A4: or          $a0, $a3, $zero
     ctx->r4 = ctx->r7 | 0;
