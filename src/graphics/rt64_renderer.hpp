@@ -3,15 +3,17 @@
  *
  * Bridges ultramodern::renderer::RendererContext to RT64::Application.
  *
- * Phase 4+6 implementation:
+ * Phase 6 implementation:
+ *   - Constructor creates RT64::Application with Core{RDRAM, DMEM, IMEM, regs, window}
  *   - send_dl    -> Application::processDisplayLists
  *   - update_screen -> Application::updateScreen
- *   - shutdown   -> Application destructor chain
+ *   - shutdown   -> Application destructor
  *
- * NOTE: This is a minimal stub that creates the RT64 Application on first
- * send_dl. Full RT64 init (Vulkan device, swapchain) requires the SDL window
- * to be passed in via ApplicationWindow::setup. We use core.window = our
- * SDL_Window* and let RT64 handle device creation.
+ * Register mapping:
+ *   ultramodern::renderer::ViRegs*  -> RT64 Core's VI_*_REG pointers
+ *   DPC registers are dummy (RT64 stores them but doesn't read them internally)
+ *   MI_INTR_REG is a dummy (ultramodern handles SP/DP completion via message queues)
+ *   checkInterrupts is a no-op (ultramodern handles interrupt dispatch)
  */
 
 #ifndef WPJ2_RT64_RENDERER_HPP

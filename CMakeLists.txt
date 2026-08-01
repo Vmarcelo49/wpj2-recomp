@@ -148,6 +148,13 @@ include_directories(
 )
 
 # Subdirectories for dependencies
+# RT64_SDL_WINDOW_VULKAN must be ON so RenderWindow = SDL_Window* on Linux
+# (instead of X11 {Display*, Window} struct). This lets us pass our SDL_Window
+# directly to RT64::Application::Core.window.
+# RT64_STATIC must be ON so we can link RT64 symbols directly into wpj2
+# (the default SHARED build hides visibility and we can't access Application).
+set(RT64_SDL_WINDOW_VULKAN ON CACHE BOOL "" FORCE)
+set(RT64_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory(lib/N64ModernRuntime)
 add_subdirectory(lib/RT64)
 
@@ -275,6 +282,12 @@ target_include_directories(wpj2 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input
     ${CMAKE_CURRENT_SOURCE_DIR}/src/rsp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game/generated
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src/hle
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src/contrib/plume
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src/contrib/hlslpp/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src/contrib/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/RT64/src/contrib
 )
 
 target_compile_options(wpj2 PRIVATE
@@ -282,6 +295,17 @@ target_compile_options(wpj2 PRIVATE
     -Wno-unused-parameter
     -Wno-missing-field-initializers
     -Wno-sign-compare
+    -fpermissive
+)
+
+# RT64 headers require these definitions to compile correctly outside
+# of the RT64 CMake directory scope.
+target_compile_definitions(wpj2 PRIVATE
+    HLSL_CPU
+    FFX_GCC
+    IMGUI_IMPL_VULKAN_NO_PROTOTYPES
+    PLUME_SDL_VULKAN_ENABLED
+    RT64_SDL_WINDOW_VULKAN
 )
 
 # Reuse the PCH from wpj2_recompiled so main.cpp also benefits
