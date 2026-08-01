@@ -140,6 +140,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/generated
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/generated
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
@@ -159,12 +160,7 @@ file(GLOB_RECURSE GAME_GENERATED_SOURCES
 )
 
 file(GLOB_RECURSE SHIM_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/rsp/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/rsp/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input/controller_pak.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp"
 )
@@ -258,6 +254,11 @@ find_package(SDL2 REQUIRED)
 
 add_executable(wpj2
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/rt64_renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input/audio.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input/input.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rsp/rsp_dispatch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/register_overlays.cpp
 )
 
 target_link_libraries(wpj2 PRIVATE
@@ -266,6 +267,14 @@ target_link_libraries(wpj2 PRIVATE
     ultramodern
     rt64
     SDL2::SDL2
+)
+
+# Include dirs for WPJ2 integration modules (rt64_renderer.hpp, audio.hpp, ...)
+target_include_directories(wpj2 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/graphics
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/audio_input
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rsp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/generated
 )
 
 target_compile_options(wpj2 PRIVATE
