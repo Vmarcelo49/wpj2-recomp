@@ -148,6 +148,11 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
     pimpl_->setup_result = pimpl_->app->setup(thread_id);
 
     if (pimpl_->setup_result == RT64::Application::SetupResult::Success) {
+        // Tell RT64 that RDRAM is extended (8MB+). librecomp allocates
+        // 512MB of RDRAM via mmap, so addresses above 0x7FFFFF are valid.
+        // Without this, RT64 rejects texture uploads from extended RDRAM.
+        pimpl_->app->state->setExtendedRDRAM(true);
+
         pimpl_->valid_ = true;
         pimpl_->initialized = true;
         fprintf(stderr, "[WPJ2/RT64] Application setup successful\n");
