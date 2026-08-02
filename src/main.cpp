@@ -148,16 +148,23 @@ int main(int argc, char** argv) {
     }
 
     // ---- 2. Create window ----
+    // WPJ2 native resolution is 320×240 (NTSC, non-interlaced).
+    // We start at 2x integer scaling (640×480) and let the user resize.
+    // The RT64 renderer will automatically scale the framebuffer to fill
+    // the window. Integer scaling is enforced by the window size hint below.
+    constexpr int NATIVE_W = 320;
+    constexpr int NATIVE_H = 240;
+    constexpr int INITIAL_SCALE = 2;  // 640×480
+
     // NOTE: SDL_WINDOW_VULKAN requires a Vulkan-capable display driver. On
     // headless CI / smoke-test runs (SDL_VIDEODRIVER=dummy/offscreen), that
     // flag fails. We try Vulkan first; if it fails, retry without it so the
-    // boot path can still be exercised (the RT64 stub doesn't actually use
-    // the window surface yet — real RT64 wiring in Phase 6 will require it).
+    // boot path can still be exercised.
     Uint32 window_flags = SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE;
     g_sdl_window = SDL_CreateWindow(
         "Wonder Project J2 - Recompiled",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        640, 480,
+        NATIVE_W * INITIAL_SCALE, NATIVE_H * INITIAL_SCALE,
         window_flags
     );
     if (!g_sdl_window) {
@@ -166,7 +173,7 @@ int main(int argc, char** argv) {
         g_sdl_window = SDL_CreateWindow(
             "Wonder Project J2 - Recompiled",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            640, 480,
+            NATIVE_W * INITIAL_SCALE, NATIVE_H * INITIAL_SCALE,
             window_flags
         );
     }
@@ -175,6 +182,14 @@ int main(int argc, char** argv) {
         SDL_Quit();
         return EXIT_FAILURE;
     }
+
+    // Set minimum window size to 1x native (320×240) so the game is always
+    // at least visible. The window can be resized to any size; RT64 will
+    // stretch the framebuffer to fill it.
+    SDL_SetWindowMinimumSize(g_sdl_window, NATIVE_W, NATIVE_H);
+
+    fprintf(stderr, "[WPJ2] Native resolution: %dx%d, initial window: %dx%d (2x)\n",
+            NATIVE_W, NATIVE_H, NATIVE_W * INITIAL_SCALE, NATIVE_H * INITIAL_SCALE);
 
     // ---- 3. Register the game with librecomp ----
     // ROM hash (XXH3_64) — pre-computed for input/wpj2.j1.z64

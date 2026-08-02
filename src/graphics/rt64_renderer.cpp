@@ -226,7 +226,8 @@ void RT64RendererContext::send_dl(const OSTask* task) {
     uint32_t dl_start = (uint32_t)task->t.data_ptr - 0x80000000;
     uint32_t dl_end = dl_start + task->t.data_size;
 
-    if (n <= 5 || (n % 100) == 0) {
+    // Only log the first 3 display lists to avoid console spam.
+    if (n <= 3) {
         fprintf(stderr, "[WPJ2/RT64] send_dl #%lu: type=%u start=0x%08X end=0x%08X size=%u\n",
                 (unsigned long)n, task->t.type, dl_start, dl_end, task->t.data_size);
     }
