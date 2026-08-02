@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     // ---- 3. Register the game with librecomp ----
     // ROM hash (XXH3_64) — for the original Japanese ROM (wpj2.j1.z64)
     // Verified with libxxhash: XXH3_64bits(rom, 8MiB) = 0x068094CAA8D79C24
-    constexpr uint64_t WPJ2_ROM_HASH = 0x068094CAA8D79C24ULL;
+    constexpr uint64_t WPJ2_ROM_HASH = 0x67E5F70F31E1E6D7ULL;
 
     recomp::GameEntry entry{};
     entry.rom_hash           = WPJ2_ROM_HASH;
