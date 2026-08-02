@@ -7824,8 +7824,8 @@ RECOMP_FUNC void func_800886C4(uint8_t* rdram, recomp_context* ctx) {
     ctx->r14 = MEM_W(ctx->r29, 0X30);
     // 0x800886E0: addiu       $a0, $sp, 0x24
     ctx->r4 = ADD32(ctx->r29, 0X24);
-    // 0x800886E4: lbu         $a2, 0x21($t6)
-    ctx->r6 = MEM_BU(ctx->r14, 0X21);
+    // 0x800886E4: lhu         $a2, 0x1E($t6)
+    ctx->r6 = MEM_HU(ctx->r14, 0X1E);
     // 0x800886E8: or          $a1, $t6, $zero
     ctx->r5 = ctx->r14 | 0;
     // 0x800886EC: jal         0x800898D8
@@ -7869,8 +7869,8 @@ L_8008871C:
     ctx->r24 = MEM_W(ctx->r29, 0X30);
     // 0x80088720: addiu       $a0, $sp, 0x24
     ctx->r4 = ADD32(ctx->r29, 0X24);
-    // 0x80088724: lbu         $a2, 0x22($t8)
-    ctx->r6 = MEM_BU(ctx->r24, 0X22);
+    // 0x80088724: lhu         $a2, 0x20($t8)
+    ctx->r6 = MEM_HU(ctx->r24, 0X20);
     // 0x80088728: or          $a1, $t8, $zero
     ctx->r5 = ctx->r24 | 0;
     // 0x8008872C: jal         0x800898D8
@@ -7916,8 +7916,8 @@ L_80088760:
     ctx->r9 = MEM_W(ctx->r29, 0X30);
     // 0x80088764: addiu       $a0, $sp, 0x24
     ctx->r4 = ADD32(ctx->r29, 0X24);
-    // 0x80088768: lbu         $a2, 0x23($t1)
-    ctx->r6 = MEM_BU(ctx->r9, 0X23);
+    // 0x80088768: lhu         $a2, 0x22($t1)
+    ctx->r6 = MEM_HU(ctx->r9, 0X22);
     // 0x8008876C: or          $a1, $t1, $zero
     ctx->r5 = ctx->r9 | 0;
     // 0x80088770: jal         0x800898D8
@@ -18885,12 +18885,12 @@ RECOMP_FUNC void func_8008834C(uint8_t* rdram, recomp_context* ctx) {
     // 0x80088378: or          $a0, $t6, $zero
     ctx->r4 = ctx->r14 | 0;
     // 0x8008837C: jal         0x8008B738
-    // 0x80088380: addiu       $a1, $t6, 0x17
-    ctx->r5 = ADD32(ctx->r14, 0X17);
+    // 0x80088380: addiu       $a1, $t6, 0x15
+    ctx->r5 = ADD32(ctx->r14, 0X15);
     func_8008B738(rdram, ctx);
         goto after_2;
-    // 0x80088380: addiu       $a1, $t6, 0x17
-    ctx->r5 = ADD32(ctx->r14, 0X17);
+    // 0x80088380: addiu       $a1, $t6, 0x15
+    ctx->r5 = ADD32(ctx->r14, 0X15);
     after_2:
     // 0x80088384: addiu       $t7, $zero, 0xE1
     ctx->r15 = ADD32(0, 0XE1);

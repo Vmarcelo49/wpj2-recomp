@@ -1804,20 +1804,20 @@ L_8007EA08:
     // 0x8007EA4C: nop
 
     after_1:
-    // 0x8007EA50: or          $t7, $v0, $zero
-    ctx->r15 = ctx->r2 | 0;
-    // 0x8007EA54: addiu       $t8, $zero, 0x3
-    ctx->r24 = ADD32(0, 0X3);
-    // 0x8007EA58: multu       $t7, $t8
-    result = U64(U32(ctx->r15)) * U64(U32(ctx->r24)); lo = S32(result >> 0); hi = S32(result >> 32);
+    // 0x8007EA50: or          $s0, $v0, $zero
+    ctx->r16 = ctx->r2 | 0;
+    // 0x8007EA54: negu        $t7, $s0
+    ctx->r15 = SUB32(0, ctx->r16);
+    // 0x8007EA58: sll         $t8, $t7, 2
+    ctx->r24 = S32(ctx->r15 << 2);
     // 0x8007EA5C: lui         $t6, 0x8015
     ctx->r14 = S32(0X8015 << 16);
     // 0x8007EA60: lw          $t6, 0x6B98($t6)
     ctx->r14 = MEM_W(ctx->r14, 0X6B98);
-    // 0x8007EA64: mflo        $t8
-    ctx->r24 = lo;
-    // 0x8007EA68: negu        $t8, $t8
-    ctx->r24 = SUB32(0, ctx->r24);
+    // 0x8007EA64: subu        $t8, $t8, $t7
+    ctx->r24 = SUB32(ctx->r24, ctx->r15);
+    // 0x8007EA68: sll         $t8, $t8, 1
+    ctx->r24 = S32(ctx->r24 << 1);
     // 0x8007EA6C: addu        $t0, $t6, $t8
     ctx->r8 = ADD32(ctx->r14, ctx->r24);
     // 0x8007EA70: addiu       $t1, $t0, 0x18

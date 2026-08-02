@@ -2,7 +2,7 @@
 # Based on Zelda64Recomp/us.rev1.toml, adapted for Wonder Project J2 (JP)
 
 [input]
-elf_path = "tools/input_patched/wonderprojectj2.en.elf"
+elf_path = "tools/input/wonderprojectj2.jp.elf"
 output_func_path = "src/game/generated/"
 entrypoint = 0x80000400
 uses_mips3_float_mode = true

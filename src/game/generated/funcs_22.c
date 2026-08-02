@@ -5540,12 +5540,12 @@ RECOMP_FUNC void func_8008C854(uint8_t* rdram, recomp_context* ctx) {
     // 0x8008C86C: addiu       $a1, $a1, -0x6110
     ctx->r5 = ADD32(ctx->r5, -0X6110);
     // 0x8008C870: jal         0x8008BEE0
-    // 0x8008C874: addiu       $a2, $zero, 0x7
-    ctx->r6 = ADD32(0, 0X7);
+    // 0x8008C874: addiu       $a2, $zero, 0x5
+    ctx->r6 = ADD32(0, 0X5);
     func_8008BEE0(rdram, ctx);
         goto after_0;
-    // 0x8008C874: addiu       $a2, $zero, 0x7
-    ctx->r6 = ADD32(0, 0X7);
+    // 0x8008C874: addiu       $a2, $zero, 0x5
+    ctx->r6 = ADD32(0, 0X5);
     after_0:
     // 0x8008C878: lw          $a0, 0x40($sp)
     ctx->r4 = MEM_W(ctx->r29, 0X40);
@@ -5553,15 +5553,15 @@ RECOMP_FUNC void func_8008C854(uint8_t* rdram, recomp_context* ctx) {
     ctx->r5 = S32(0X800E << 16);
     // 0x8008C880: addiu       $a1, $a1, -0x611C
     ctx->r5 = ADD32(ctx->r5, -0X611C);
-    // 0x8008C884: addiu       $a2, $zero, 0x7
-    ctx->r6 = ADD32(0, 0X7);
+    // 0x8008C884: addiu       $a2, $zero, 0x5
+    ctx->r6 = ADD32(0, 0X5);
     // 0x8008C888: jal         0x8008BEE0
-    // 0x8008C88C: addiu       $a0, $a0, 0x7
-    ctx->r4 = ADD32(ctx->r4, 0X7);
+    // 0x8008C88C: addiu       $a0, $a0, 0x5
+    ctx->r4 = ADD32(ctx->r4, 0X5);
     func_8008BEE0(rdram, ctx);
         goto after_1;
-    // 0x8008C88C: addiu       $a0, $a0, 0x7
-    ctx->r4 = ADD32(ctx->r4, 0X7);
+    // 0x8008C88C: addiu       $a0, $a0, 0x5
+    ctx->r4 = ADD32(ctx->r4, 0X5);
     after_1:
     // 0x8008C890: lw          $a0, 0x40($sp)
     ctx->r4 = MEM_W(ctx->r29, 0X40);

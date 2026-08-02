@@ -1424,10 +1424,10 @@ L_8008CAAC:
     ctx->r25 = ADD32(ctx->r25, 0X7AE8);
     // 0x8008CAE0: addu        $t0, $t8, $t9
     ctx->r8 = ADD32(ctx->r24, ctx->r25);
-    // 0x8008CAE4: lbu         $t1, 0x13($t0)
-    ctx->r9 = MEM_BU(ctx->r8, 0X13);
-    // 0x8008CAE8: lbu         $t3, 0x21($t2)
-    ctx->r11 = MEM_BU(ctx->r10, 0X21);
+    // 0x8008CAE4: lhu         $t1, 0x10($t0)
+    ctx->r9 = MEM_HU(ctx->r8, 0X10);
+    // 0x8008CAE8: lhu         $t3, 0x1E($t2)
+    ctx->r11 = MEM_HU(ctx->r10, 0X1E);
     // 0x8008CAEC: nop
 
     // 0x8008CAF0: bne         $t1, $t3, L_8008CB70
@@ -1438,10 +1438,10 @@ L_8008CAAC:
     }
     // 0x8008CAF4: nop
 
-    // 0x8008CAF8: lbu         $t4, 0x14($t0)
-    ctx->r12 = MEM_BU(ctx->r8, 0X14);
-    // 0x8008CAFC: lbu         $t5, 0x22($t2)
-    ctx->r13 = MEM_BU(ctx->r10, 0X22);
+    // 0x8008CAF8: lhu         $t4, 0x12($t0)
+    ctx->r12 = MEM_HU(ctx->r8, 0X12);
+    // 0x8008CAFC: lhu         $t5, 0x20($t2)
+    ctx->r13 = MEM_HU(ctx->r10, 0X20);
     // 0x8008CB00: nop
 
     // 0x8008CB04: bne         $t4, $t5, L_8008CB70
@@ -1452,10 +1452,10 @@ L_8008CAAC:
     }
     // 0x8008CB08: nop
 
-    // 0x8008CB0C: lbu         $t6, 0x15($t0)
-    ctx->r14 = MEM_BU(ctx->r8, 0X15);
-    // 0x8008CB10: lbu         $t7, 0x23($t2)
-    ctx->r15 = MEM_BU(ctx->r10, 0X23);
+    // 0x8008CB0C: lhu         $t6, 0x14($t0)
+    ctx->r14 = MEM_HU(ctx->r8, 0X14);
+    // 0x8008CB10: lhu         $t7, 0x22($t2)
+    ctx->r15 = MEM_HU(ctx->r10, 0X22);
     // 0x8008CB14: nop
 
     // 0x8008CB18: bne         $t6, $t7, L_8008CB70

@@ -432,16 +432,16 @@ L_80087E40:
     ctx->r13 = MEM_BU(ctx->r13, 0X4BF4);
     // 0x80087E54: addu        $t7, $t6, $t4
     ctx->r15 = ADD32(ctx->r14, ctx->r12);
-    // 0x80087E58: sb          $t5, 0x17($t7)
-    MEM_B(0X17, ctx->r15) = ctx->r13;
+    // 0x80087E58: sb          $t5, 0x15($t7)
+    MEM_B(0X15, ctx->r15) = ctx->r13;
     // 0x80087E5C: lw          $t9, 0x28($sp)
     ctx->r25 = MEM_W(ctx->r29, 0X28);
     // 0x80087E60: nop
 
     // 0x80087E64: addiu       $t8, $t9, 0x1
     ctx->r24 = ADD32(ctx->r25, 0X1);
-    // 0x80087E68: slti        $at, $t8, 0x7
-    ctx->r1 = SIGNED(ctx->r24) < 0X7 ? 1 : 0;
+    // 0x80087E68: slti        $at, $t8, 0x5
+    ctx->r1 = SIGNED(ctx->r24) < 0X5 ? 1 : 0;
     // 0x80087E6C: bne         $at, $zero, L_80087E40
     if (ctx->r1 != 0) {
         // 0x80087E70: sw          $t8, 0x28($sp)

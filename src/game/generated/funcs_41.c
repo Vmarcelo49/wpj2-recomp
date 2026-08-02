@@ -72,12 +72,12 @@ L_8008BE5C:
     // 0x8008BE74: addu        $a1, $t3, $t4
     ctx->r5 = ADD32(ctx->r11, ctx->r12);
     // 0x8008BE78: jal         0x800BCFCC
-    // 0x8008BE7C: addiu       $a2, $zero, 0x1
-    ctx->r6 = ADD32(0, 0X1);
+    // 0x8008BE7C: addiu       $a2, $zero, 0x2
+    ctx->r6 = ADD32(0, 0X2);
     SysMem_Copy8(rdram, ctx);
         goto after_0;
-    // 0x8008BE7C: addiu       $a2, $zero, 0x1
-    ctx->r6 = ADD32(0, 0X1);
+    // 0x8008BE7C: addiu       $a2, $zero, 0x2
+    ctx->r6 = ADD32(0, 0X2);
     after_0:
     // 0x8008BE80: lw          $t5, 0x24($sp)
     ctx->r13 = MEM_W(ctx->r29, 0X24);
@@ -91,8 +91,8 @@ L_8008BE5C:
     ctx->r14 = ADD32(ctx->r13, 0X2);
     // 0x8008BE94: addiu       $t8, $t7, 0x1
     ctx->r24 = ADD32(ctx->r15, 0X1);
-    // 0x8008BE98: addiu       $t0, $t9, 0x1
-    ctx->r8 = ADD32(ctx->r25, 0X1);
+    // 0x8008BE98: addiu       $t0, $t9, 0x2
+    ctx->r8 = ADD32(ctx->r25, 0X2);
     // 0x8008BE9C: slt         $at, $t6, $t1
     ctx->r1 = SIGNED(ctx->r14) < SIGNED(ctx->r9) ? 1 : 0;
     // 0x8008BEA0: sw          $t0, 0x1C($sp)
@@ -6741,10 +6741,10 @@ L_8008BF10:
     }
     // 0x8008BF24: nop
 
-    // 0x8008BF28: lbu         $t1, 0x0($a1)
-    ctx->r9 = MEM_BU(ctx->r5, 0X0);
-    // 0x8008BF2C: lbu         $t2, 0x0($t9)
-    ctx->r10 = MEM_BU(ctx->r25, 0X0);
+    // 0x8008BF28: lbu         $t1, 0x1($a1)
+    ctx->r9 = MEM_BU(ctx->r5, 0X1);
+    // 0x8008BF2C: lbu         $t2, 0x1($t9)
+    ctx->r10 = MEM_BU(ctx->r25, 0X1);
     // 0x8008BF30: nop
 
     // 0x8008BF34: bne         $t1, $t2, L_8008BF50
@@ -6793,10 +6793,10 @@ L_8008BF6C:
     ctx->r8 = ADD32(ctx->r24, 0X1);
     // 0x8008BF78: sw          $t0, 0xC($sp)
     MEM_W(0XC, ctx->r29) = ctx->r8;
-    // 0x8008BF7C: lbu         $t9, 0x1($a1)
-    ctx->r25 = MEM_BU(ctx->r5, 0X1);
-    // 0x8008BF80: addiu       $a1, $a1, 0x1
-    ctx->r5 = ADD32(ctx->r5, 0X1);
+    // 0x8008BF7C: lbu         $t9, 0x2($a1)
+    ctx->r25 = MEM_BU(ctx->r5, 0X2);
+    // 0x8008BF80: addiu       $a1, $a1, 0x2
+    ctx->r5 = ADD32(ctx->r5, 0X2);
     // 0x8008BF84: beq         $t9, $zero, L_8008BF98
     if (ctx->r25 == 0) {
         // 0x8008BF88: nop

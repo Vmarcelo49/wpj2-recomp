@@ -16450,8 +16450,8 @@ L_80090B14:
     }
     // 0x80090B28: nop
 
-    // 0x80090B2C: addiu       $t0, $zero, 0x8
-    ctx->r8 = ADD32(0, 0X8);
+    // 0x80090B2C: addiu       $t0, $zero, 0xC
+    ctx->r8 = ADD32(0, 0XC);
     // 0x80090B30: lui         $at, 0x8015
     ctx->r1 = S32(0X8015 << 16);
     // 0x80090B34: sw          $t0, 0x61CC($at)

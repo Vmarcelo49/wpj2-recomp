@@ -6188,8 +6188,8 @@ L_80088928:
     ctx->r12 = MEM_W(ctx->r29, 0X38);
     // 0x80088938: addiu       $t3, $t2, -0x6
     ctx->r11 = ADD32(ctx->r10, -0X6);
-    // 0x8008893C: sb          $t3, 0x21($t4)
-    MEM_B(0X21, ctx->r12) = ctx->r11;
+    // 0x8008893C: sh          $t3, 0x1E($t4)
+    MEM_H(0X1E, ctx->r12) = ctx->r11;
     // 0x80088940: lh          $t5, 0x34($sp)
     ctx->r13 = MEM_H(ctx->r29, 0X34);
     // 0x80088944: lw          $a0, 0x38($sp)
@@ -6231,8 +6231,8 @@ L_80088968:
     ctx->r25 = MEM_W(ctx->r29, 0X38);
     // 0x80088978: addiu       $t7, $t6, -0xA
     ctx->r15 = ADD32(ctx->r14, -0XA);
-    // 0x8008897C: sb          $t7, 0x22($t9)
-    MEM_B(0X22, ctx->r25) = ctx->r15;
+    // 0x8008897C: sh          $t7, 0x20($t9)
+    MEM_H(0X20, ctx->r25) = ctx->r15;
     // 0x80088980: lh          $t8, 0x34($sp)
     ctx->r24 = MEM_H(ctx->r29, 0X34);
     // 0x80088984: lw          $a0, 0x38($sp)
@@ -6276,8 +6276,8 @@ L_800889AC:
     ctx->r11 = MEM_W(ctx->r29, 0X38);
     // 0x800889BC: addiu       $t2, $t1, -0xD
     ctx->r10 = ADD32(ctx->r9, -0XD);
-    // 0x800889C0: sb          $t2, 0x23($t3)
-    MEM_B(0X23, ctx->r11) = ctx->r10;
+    // 0x800889C0: sh          $t2, 0x22($t3)
+    MEM_H(0X22, ctx->r11) = ctx->r10;
     // 0x800889C4: lh          $t4, 0x34($sp)
     ctx->r12 = MEM_H(ctx->r29, 0X34);
     // 0x800889C8: lw          $a0, 0x38($sp)

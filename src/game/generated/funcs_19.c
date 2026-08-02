@@ -11360,8 +11360,8 @@ L_800877FC:
 
     // 0x80087820: addiu       $t6, $t5, 0x1
     ctx->r14 = ADD32(ctx->r13, 0X1);
-    // 0x80087824: slti        $at, $t6, 0x6
-    ctx->r1 = SIGNED(ctx->r14) < 0X6 ? 1 : 0;
+    // 0x80087824: slti        $at, $t6, 0x5
+    ctx->r1 = SIGNED(ctx->r14) < 0X5 ? 1 : 0;
     // 0x80087828: bne         $at, $zero, L_800877FC
     if (ctx->r1 != 0) {
         // 0x8008782C: sw          $t6, 0x1C($sp)
@@ -11482,8 +11482,8 @@ L_800878C8:
 
     // 0x800878D0: addiu       $t8, $t9, 0x1
     ctx->r24 = ADD32(ctx->r25, 0X1);
-    // 0x800878D4: slti        $at, $t8, 0x7
-    ctx->r1 = SIGNED(ctx->r24) < 0X7 ? 1 : 0;
+    // 0x800878D4: slti        $at, $t8, 0x5
+    ctx->r1 = SIGNED(ctx->r24) < 0X5 ? 1 : 0;
     // 0x800878D8: beq         $at, $zero, L_800878FC
     if (ctx->r1 == 0) {
         // 0x800878DC: sw          $t8, 0x1C($sp)
@@ -11515,8 +11515,8 @@ L_800878FC:
     ctx->r10 = MEM_W(ctx->r29, 0X1C);
     // 0x80087900: nop
 
-    // 0x80087904: slti        $at, $t2, 0x6
-    ctx->r1 = SIGNED(ctx->r10) < 0X6 ? 1 : 0;
+    // 0x80087904: slti        $at, $t2, 0x4
+    ctx->r1 = SIGNED(ctx->r10) < 0X4 ? 1 : 0;
     // 0x80087908: bne         $at, $zero, L_80087918
     if (ctx->r1 != 0) {
         // 0x8008790C: nop
@@ -11534,8 +11534,8 @@ L_80087918:
     ctx->r12 = MEM_W(ctx->r29, 0X1C);
     // 0x8008791C: nop
 
-    // 0x80087920: slti        $at, $t4, 0x7
-    ctx->r1 = SIGNED(ctx->r12) < 0X7 ? 1 : 0;
+    // 0x80087920: slti        $at, $t4, 0x5
+    ctx->r1 = SIGNED(ctx->r12) < 0X5 ? 1 : 0;
     // 0x80087924: bne         $at, $zero, L_80087934
     if (ctx->r1 != 0) {
         // 0x80087928: nop
@@ -11544,8 +11544,8 @@ L_80087918:
     }
     // 0x80087928: nop
 
-    // 0x8008792C: addiu       $t5, $zero, 0x6
-    ctx->r13 = ADD32(0, 0X6);
+    // 0x8008792C: addiu       $t5, $zero, 0x4
+    ctx->r13 = ADD32(0, 0X4);
     // 0x80087930: sw          $t5, 0x1C($sp)
     MEM_W(0X1C, ctx->r29) = ctx->r13;
 L_80087934:
@@ -11672,8 +11672,8 @@ L_800879F4:
 
     // 0x800879FC: addiu       $t9, $t6, 0x1
     ctx->r25 = ADD32(ctx->r14, 0X1);
-    // 0x80087A00: slti        $at, $t9, 0x7
-    ctx->r1 = SIGNED(ctx->r25) < 0X7 ? 1 : 0;
+    // 0x80087A00: slti        $at, $t9, 0x5
+    ctx->r1 = SIGNED(ctx->r25) < 0X5 ? 1 : 0;
     // 0x80087A04: beq         $at, $zero, L_80087A28
     if (ctx->r1 == 0) {
         // 0x80087A08: sw          $t9, 0x1C($sp)
@@ -11874,8 +11874,8 @@ L_80087B00:
 
     // 0x80087B24: addiu       $t8, $t5, 0x1
     ctx->r24 = ADD32(ctx->r13, 0X1);
-    // 0x80087B28: slti        $at, $t8, 0x6
-    ctx->r1 = SIGNED(ctx->r24) < 0X6 ? 1 : 0;
+    // 0x80087B28: slti        $at, $t8, 0x5
+    ctx->r1 = SIGNED(ctx->r24) < 0X5 ? 1 : 0;
     // 0x80087B2C: bne         $at, $zero, L_80087B00
     if (ctx->r1 != 0) {
         // 0x80087B30: sw          $t8, 0x1C($sp)

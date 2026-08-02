@@ -490,12 +490,12 @@ RECOMP_FUNC void func_80088674(uint8_t* rdram, recomp_context* ctx) {
     // 0x800886A0: or          $a0, $t6, $zero
     ctx->r4 = ctx->r14 | 0;
     // 0x800886A4: jal         0x8008B738
-    // 0x800886A8: addiu       $a1, $t6, 0x17
-    ctx->r5 = ADD32(ctx->r14, 0X17);
+    // 0x800886A8: addiu       $a1, $t6, 0x15
+    ctx->r5 = ADD32(ctx->r14, 0X15);
     func_8008B738(rdram, ctx);
         goto after_2;
-    // 0x800886A8: addiu       $a1, $t6, 0x17
-    ctx->r5 = ADD32(ctx->r14, 0X17);
+    // 0x800886A8: addiu       $a1, $t6, 0x15
+    ctx->r5 = ADD32(ctx->r14, 0X15);
     after_2:
     // 0x800886AC: b           L_800886B4
     // 0x800886B0: nop
@@ -1435,12 +1435,12 @@ L_8006DDF8:
 RECOMP_FUNC void func_8008C528(uint8_t* rdram, recomp_context* ctx) {
     uint64_t hi = 0, lo = 0, result = 0;
     int c1cs = 0;
-    // 0x8008C528: lbu         $t6, 0x15($a1)
-    ctx->r14 = MEM_BU(ctx->r5, 0X15);
-    // 0x8008C52C: lbu         $t8, 0x13($a1)
-    ctx->r24 = MEM_BU(ctx->r5, 0X13);
-    // 0x8008C530: lbu         $t1, 0x14($a1)
-    ctx->r9 = MEM_BU(ctx->r5, 0X14);
+    // 0x8008C528: lhu         $t6, 0x14($a1)
+    ctx->r14 = MEM_HU(ctx->r5, 0X14);
+    // 0x8008C52C: lhu         $t8, 0x10($a1)
+    ctx->r24 = MEM_HU(ctx->r5, 0X10);
+    // 0x8008C530: lhu         $t1, 0x12($a1)
+    ctx->r9 = MEM_HU(ctx->r5, 0X12);
     // 0x8008C534: sll         $t7, $t6, 4
     ctx->r15 = S32(ctx->r14 << 4);
     // 0x8008C538: sll         $t9, $t8, 1
