@@ -3,5 +3,5 @@
 
 gpr get_entrypoint_address() { return (gpr)(int32_t)0x80000400u; }
 
-const char* get_rom_name() { return "wonderprojectj2.jp.z64"; }
+const char* get_rom_name() { return "wonderprojectj2.en.z64"; }
 

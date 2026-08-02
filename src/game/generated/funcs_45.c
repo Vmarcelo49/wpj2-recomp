@@ -9434,12 +9434,12 @@ RECOMP_FUNC void func_80085F20(uint8_t* rdram, recomp_context* ctx) {
     // 0x80085FEC: or          $a2, $zero, $zero
     ctx->r6 = 0 | 0;
     // 0x80085FF0: jal         0x8008B738
-    // 0x80085FF4: addiu       $a1, $a1, 0x7
-    ctx->r5 = ADD32(ctx->r5, 0X7);
+    // 0x80085FF4: addiu       $a1, $a1, 0x9
+    ctx->r5 = ADD32(ctx->r5, 0X9);
     func_8008B738(rdram, ctx);
         goto after_4;
-    // 0x80085FF4: addiu       $a1, $a1, 0x7
-    ctx->r5 = ADD32(ctx->r5, 0X7);
+    // 0x80085FF4: addiu       $a1, $a1, 0x9
+    ctx->r5 = ADD32(ctx->r5, 0X9);
     after_4:
 L_80085FF8:
     // 0x80085FF8: b           L_80086000

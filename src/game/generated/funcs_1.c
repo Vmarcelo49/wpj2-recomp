@@ -3347,12 +3347,12 @@ RECOMP_FUNC void func_80086A94(uint8_t* rdram, recomp_context* ctx) {
     // 0x80086B60: or          $a2, $zero, $zero
     ctx->r6 = 0 | 0;
     // 0x80086B64: jal         0x8008B738
-    // 0x80086B68: addiu       $a1, $a1, 0x7
-    ctx->r5 = ADD32(ctx->r5, 0X7);
+    // 0x80086B68: addiu       $a1, $a1, 0x9
+    ctx->r5 = ADD32(ctx->r5, 0X9);
     func_8008B738(rdram, ctx);
         goto after_4;
-    // 0x80086B68: addiu       $a1, $a1, 0x7
-    ctx->r5 = ADD32(ctx->r5, 0X7);
+    // 0x80086B68: addiu       $a1, $a1, 0x9
+    ctx->r5 = ADD32(ctx->r5, 0X9);
     after_4:
 L_80086B6C:
     // 0x80086B6C: b           L_80086B74

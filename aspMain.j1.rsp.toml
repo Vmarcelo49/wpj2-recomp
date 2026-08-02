@@ -4,7 +4,7 @@
 text_offset = 0xD9BB0
 text_size = 0xE20
 text_address = 0x04001080
-rom_file_path = "input/wpj2.j1.z64"
+rom_file_path = "input/wpj2.en.z64"
 output_file_path = "src/rsp/generated/aspMain.c"
 output_function_name = "aspMain"
 

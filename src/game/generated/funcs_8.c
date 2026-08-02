@@ -2073,10 +2073,10 @@ L_80011ACC:
     }
     // 0x80011AE8: nop
 
-    // 0x80011AEC: lui         $t5, 0x8099
-    ctx->r13 = S32(0X8099 << 16);
-    // 0x80011AF0: addiu       $t5, $t5, 0x6A20
-    ctx->r13 = ADD32(ctx->r13, 0X6A20);
+    // 0x80011AEC: lui         $t5, 0x80B0
+    ctx->r13 = S32(0X80B0 << 16);
+    // 0x80011AF0: addiu       $t5, $t5, 0x4E40
+    ctx->r13 = ADD32(ctx->r13, 0X4E40);
     // 0x80011AF4: b           L_80011B0C
     // 0x80011AF8: sw          $t5, 0x28($sp)
     MEM_W(0X28, ctx->r29) = ctx->r13;

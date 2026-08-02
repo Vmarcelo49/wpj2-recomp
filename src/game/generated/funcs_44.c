@@ -4164,15 +4164,15 @@ L_8004574C:
     ctx->r5 = MEM_W(ctx->r5, -0X480);
     // 0x80045790: lw          $a0, -0x488($a0)
     ctx->r4 = MEM_W(ctx->r4, -0X488);
-    // 0x80045794: lui         $a2, 0x80A4
-    ctx->r6 = S32(0X80A4 << 16);
+    // 0x80045794: lui         $a2, 0x80B5
+    ctx->r6 = S32(0X80B5 << 16);
     // 0x80045798: jal         0x800BD1FC
-    // 0x8004579C: addiu       $a2, $a2, -0x1BD0
-    ctx->r6 = ADD32(ctx->r6, -0X1BD0);
+    // 0x8004579C: addiu       $a2, $a2, 0x2220
+    ctx->r6 = ADD32(ctx->r6, 0X2220);
     SysMem_GetPhysicalAddressFromVirtual(rdram, ctx);
         goto after_10;
-    // 0x8004579C: addiu       $a2, $a2, -0x1BD0
-    ctx->r6 = ADD32(ctx->r6, -0X1BD0);
+    // 0x8004579C: addiu       $a2, $a2, 0x2220
+    ctx->r6 = ADD32(ctx->r6, 0X2220);
     after_10:
     // 0x800457A0: lui         $t9, 0x801A
     ctx->r25 = S32(0X801A << 16);
@@ -4200,15 +4200,15 @@ L_8004574C:
     ctx->r5 = MEM_W(ctx->r5, -0X480);
     // 0x800457C8: lw          $a0, -0x488($a0)
     ctx->r4 = MEM_W(ctx->r4, -0X488);
-    // 0x800457CC: lui         $a2, 0x80A4
-    ctx->r6 = S32(0X80A4 << 16);
+    // 0x800457CC: lui         $a2, 0x80B5
+    ctx->r6 = S32(0X80B5 << 16);
     // 0x800457D0: jal         0x800BD1FC
-    // 0x800457D4: addiu       $a2, $a2, -0x1BA4
-    ctx->r6 = ADD32(ctx->r6, -0X1BA4);
+    // 0x800457D4: addiu       $a2, $a2, 0x2254
+    ctx->r6 = ADD32(ctx->r6, 0X2254);
     SysMem_GetPhysicalAddressFromVirtual(rdram, ctx);
         goto after_12;
-    // 0x800457D4: addiu       $a2, $a2, -0x1BA4
-    ctx->r6 = ADD32(ctx->r6, -0X1BA4);
+    // 0x800457D4: addiu       $a2, $a2, 0x2254
+    ctx->r6 = ADD32(ctx->r6, 0X2254);
     after_12:
     // 0x800457D8: lui         $t8, 0x801A
     ctx->r24 = S32(0X801A << 16);
@@ -4236,15 +4236,15 @@ L_8004574C:
     ctx->r5 = MEM_W(ctx->r5, -0X480);
     // 0x80045800: lw          $a0, -0x488($a0)
     ctx->r4 = MEM_W(ctx->r4, -0X488);
-    // 0x80045804: lui         $a2, 0x80A4
-    ctx->r6 = S32(0X80A4 << 16);
+    // 0x80045804: lui         $a2, 0x80B5
+    ctx->r6 = S32(0X80B5 << 16);
     // 0x80045808: jal         0x800BD1FC
-    // 0x8004580C: addiu       $a2, $a2, -0x1B18
-    ctx->r6 = ADD32(ctx->r6, -0X1B18);
+    // 0x8004580C: addiu       $a2, $a2, 0x22D8
+    ctx->r6 = ADD32(ctx->r6, 0X22D8);
     SysMem_GetPhysicalAddressFromVirtual(rdram, ctx);
         goto after_14;
-    // 0x8004580C: addiu       $a2, $a2, -0x1B18
-    ctx->r6 = ADD32(ctx->r6, -0X1B18);
+    // 0x8004580C: addiu       $a2, $a2, 0x22D8
+    ctx->r6 = ADD32(ctx->r6, 0X22D8);
     after_14:
     // 0x80045810: lui         $t0, 0x801A
     ctx->r8 = S32(0X801A << 16);
@@ -9015,15 +9015,15 @@ L_8007D81C:
     ctx->r1 = S32(0X8015 << 16);
     // 0x8007D898: sw          $t6, 0x6BA0($at)
     MEM_W(0X6BA0, ctx->r1) = ctx->r14;
-    // 0x8007D89C: lui         $a0, 0x800F
-    ctx->r4 = S32(0X800F << 16);
+    // 0x8007D89C: lui         $a0, 0x800E
+    ctx->r4 = S32(0X800E << 16);
     // 0x8007D8A0: jal         0x8008ECE4
-    // 0x8007D8A4: addiu       $a0, $a0, -0xDB0
-    ctx->r4 = ADD32(ctx->r4, -0XDB0);
+    // 0x8007D8A4: addiu       $a0, $a0, 0x7180
+    ctx->r4 = ADD32(ctx->r4, 0X7180);
     func_8008ECE4(rdram, ctx);
         goto after_14;
-    // 0x8007D8A4: addiu       $a0, $a0, -0xDB0
-    ctx->r4 = ADD32(ctx->r4, -0XDB0);
+    // 0x8007D8A4: addiu       $a0, $a0, 0x7180
+    ctx->r4 = ADD32(ctx->r4, 0X7180);
     after_14:
     // 0x8007D8A8: jal         0x80080698
     // 0x8007D8AC: addiu       $a0, $sp, 0x2C
@@ -9041,8 +9041,8 @@ L_8007D81C:
     ctx->r24 = SUB32(ctx->r24, ctx->r15);
     // 0x8007D8BC: sll         $t8, $t8, 1
     ctx->r24 = S32(ctx->r24 << 1);
-    // 0x8007D8C0: addiu       $t9, $t8, 0x51
-    ctx->r25 = ADD32(ctx->r24, 0X51);
+    // 0x8007D8C0: addiu       $t9, $zero, 0x26
+    ctx->r25 = ADD32(0, 0X26);
     // 0x8007D8C4: lui         $at, 0x8015
     ctx->r1 = S32(0X8015 << 16);
     // 0x8007D8C8: sw          $t9, 0x6B98($at)

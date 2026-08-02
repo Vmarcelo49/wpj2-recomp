@@ -213,9 +213,9 @@ int main(int argc, char** argv) {
             NATIVE_W, NATIVE_H, NATIVE_W * INITIAL_SCALE, NATIVE_H * INITIAL_SCALE);
 
     // ---- 3. Register the game with librecomp ----
-    // ROM hash (XXH3_64) — pre-computed for input/wpj2.j1.z64
-    // Verified with libxxhash: XXH3_64bits(rom, 8MiB) = 0x068094CAA8D79C24
-    constexpr uint64_t WPJ2_ROM_HASH = 0x068094CAA8D79C24ULL;
+    // ROM hash (XXH3_64) — for the English-patched ROM (wpj2.en.z64)
+    // Verified with libxxhash: XXH3_64bits(rom, 8893598) = 0x67E5F70F31E1E6D7
+    constexpr uint64_t WPJ2_ROM_HASH = 0x67E5F70F31E1E6D7ULL;
 
     recomp::GameEntry entry{};
     entry.rom_hash           = WPJ2_ROM_HASH;
@@ -250,12 +250,14 @@ int main(int argc, char** argv) {
 
     // Copy ROM into the config path so librecomp can find it (one-time).
     // librecomp looks for "<config_path>/<game_id>.z64".
+    // Supports both the English-patched ROM (wpj2.en.z64) and the original
+    // Japanese ROM (wpj2.j1.z64) — the English patch is preferred.
     std::filesystem::path stored_rom = config_dir / "wpj2_jp.z64";
     if (!std::filesystem::exists(stored_rom)) {
-        std::filesystem::path src_rom = std::filesystem::current_path() / "input" / "wpj2.j1.z64";
+        // Try English-patched ROM first, then fall back to Japanese
+        std::filesystem::path src_rom = std::filesystem::current_path() / "input" / "wpj2.en.z64";
         if (!std::filesystem::exists(src_rom)) {
-            // Try absolute path relative to executable
-            src_rom = "/home/marcelo/projects/WPJ2-recomp/input/wpj2.j1.z64";
+            src_rom = std::filesystem::current_path() / "input" / "wpj2.j1.z64";
         }
         if (std::filesystem::exists(src_rom)) {
             std::error_code ec;

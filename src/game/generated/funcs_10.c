@@ -631,8 +631,8 @@ L_8008C570:
 
     // 0x8008C590: addiu       $t3, $t2, 0x1
     ctx->r11 = ADD32(ctx->r10, 0X1);
-    // 0x8008C594: slti        $at, $t3, 0x5
-    ctx->r1 = SIGNED(ctx->r11) < 0X5 ? 1 : 0;
+    // 0x8008C594: slti        $at, $t3, 0x7
+    ctx->r1 = SIGNED(ctx->r11) < 0X7 ? 1 : 0;
     // 0x8008C598: bne         $at, $zero, L_8008C570
     if (ctx->r1 != 0) {
         // 0x8008C59C: sw          $t3, 0x0($sp)
@@ -650,20 +650,20 @@ L_8008C5A4:
 
     // 0x8008C5AC: addu        $t5, $a1, $t4
     ctx->r13 = ADD32(ctx->r5, ctx->r12);
-    // 0x8008C5B0: lbu         $t6, 0x5($t5)
-    ctx->r14 = MEM_BU(ctx->r13, 0X5);
+    // 0x8008C5B0: lbu         $t6, 0x651($t5)
+    ctx->r14 = MEM_BU(ctx->r13, 0X651);
     // 0x8008C5B4: addu        $t7, $a0, $t4
     ctx->r15 = ADD32(ctx->r4, ctx->r12);
-    // 0x8008C5B8: sb          $t6, 0x7($t7)
-    MEM_B(0X7, ctx->r15) = ctx->r14;
+    // 0x8008C5B8: sb          $t6, 0x9($t7)
+    MEM_B(0X9, ctx->r15) = ctx->r14;
     // 0x8008C5BC: lw          $t9, 0x0($sp)
     ctx->r25 = MEM_W(ctx->r29, 0X0);
     // 0x8008C5C0: nop
 
     // 0x8008C5C4: addiu       $t8, $t9, 0x1
     ctx->r24 = ADD32(ctx->r25, 0X1);
-    // 0x8008C5C8: slti        $at, $t8, 0x5
-    ctx->r1 = SIGNED(ctx->r24) < 0X5 ? 1 : 0;
+    // 0x8008C5C8: slti        $at, $t8, 0x7
+    ctx->r1 = SIGNED(ctx->r24) < 0X7 ? 1 : 0;
     // 0x8008C5CC: bne         $at, $zero, L_8008C5A4
     if (ctx->r1 != 0) {
         // 0x8008C5D0: sw          $t8, 0x0($sp)
@@ -676,14 +676,14 @@ L_8008C5A4:
     ctx->r8 = MEM_H(ctx->r5, 0XAE);
     // 0x8008C5D8: nop
 
-    // 0x8008C5DC: sh          $t0, 0xC($a0)
-    MEM_H(0XC, ctx->r4) = ctx->r8;
+    // 0x8008C5DC: sh          $t0, 0x10($a0)
+    MEM_H(0X10, ctx->r4) = ctx->r8;
     // 0x8008C5E0: lhu         $t1, 0x6C($a1)
     ctx->r9 = MEM_HU(ctx->r5, 0X6C);
     // 0x8008C5E4: nop
 
-    // 0x8008C5E8: sh          $t1, 0xE($a0)
-    MEM_H(0XE, ctx->r4) = ctx->r9;
+    // 0x8008C5E8: sb          $t1, 0x12($a0)
+    MEM_B(0X12, ctx->r4) = ctx->r9;
     // 0x8008C5EC: lbu         $t2, 0x64($a1)
     ctx->r10 = MEM_BU(ctx->r5, 0X64);
     // 0x8008C5F0: nop
@@ -692,16 +692,16 @@ L_8008C5A4:
     ctx->r11 = ctx->r10 & 0XE;
     // 0x8008C5F8: sra         $t5, $t3, 1
     ctx->r13 = S32(SIGNED(ctx->r11) >> 1);
-    // 0x8008C5FC: sh          $t5, 0x10($a0)
-    MEM_H(0X10, ctx->r4) = ctx->r13;
+    // 0x8008C5FC: sb          $t5, 0x13($a0)
+    MEM_B(0X13, ctx->r4) = ctx->r13;
     // 0x8008C600: lbu         $t4, 0x64($a1)
     ctx->r12 = MEM_BU(ctx->r5, 0X64);
     // 0x8008C604: nop
 
     // 0x8008C608: andi        $t6, $t4, 0x1
     ctx->r14 = ctx->r12 & 0X1;
-    // 0x8008C60C: sh          $t6, 0x12($a0)
-    MEM_H(0X12, ctx->r4) = ctx->r14;
+    // 0x8008C60C: sb          $t6, 0x14($a0)
+    MEM_B(0X14, ctx->r4) = ctx->r14;
     // 0x8008C610: lbu         $t7, 0x64($a1)
     ctx->r15 = MEM_BU(ctx->r5, 0X64);
     // 0x8008C614: nop
@@ -710,8 +710,8 @@ L_8008C5A4:
     ctx->r25 = ctx->r15 & 0XF0;
     // 0x8008C61C: sra         $t8, $t9, 4
     ctx->r24 = S32(SIGNED(ctx->r25) >> 4);
-    // 0x8008C620: sh          $t8, 0x14($a0)
-    MEM_H(0X14, ctx->r4) = ctx->r24;
+    // 0x8008C620: sb          $t8, 0x15($a0)
+    MEM_B(0X15, ctx->r4) = ctx->r24;
     // 0x8008C624: b           L_8008C62C
     // 0x8008C628: nop
 

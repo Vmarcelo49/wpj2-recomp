@@ -18060,8 +18060,8 @@ RECOMP_FUNC void func_80087C2C(uint8_t* rdram, recomp_context* ctx) {
     ctx->r4 = S32(0X800E << 16);
     // 0x80087D00: addiu       $a0, $a0, -0x6110
     ctx->r4 = ADD32(ctx->r4, -0X6110);
-    // 0x80087D04: addiu       $a2, $zero, 0xA
-    ctx->r6 = ADD32(0, 0XA);
+    // 0x80087D04: addiu       $a2, $zero, 0xE
+    ctx->r6 = ADD32(0, 0XE);
     // 0x80087D08: jal         0x8008BE0C
     // 0x80087D0C: addiu       $a1, $a1, 0x10
     ctx->r5 = ADD32(ctx->r5, 0X10);
