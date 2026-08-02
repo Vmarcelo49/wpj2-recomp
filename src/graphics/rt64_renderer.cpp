@@ -67,6 +67,7 @@ struct RT64RendererContext::Impl {
 
     std::unique_ptr<RT64::Application> app;
     RT64::Application::SetupResult setup_result = RT64::Application::SetupResult::Success;
+    bool integer_scaling = true;  // default: integer scaling
     bool valid_ = false;
     bool initialized = false;
 
@@ -279,12 +280,53 @@ float RT64RendererContext::get_resolution_scale() const {
     return 1.0f;
 }
 
+bool RT64RendererContext::toggle_scaling() {
+    if (!pimpl_->initialized || !pimpl_->app) {
+        return pimpl_->integer_scaling;
+    }
+
+    pimpl_->integer_scaling = !pimpl_->integer_scaling;
+
+    if (pimpl_->integer_scaling) {
+        // Integer scaling: use the largest integer multiple that fits the window.
+        // Maintains 4:3 aspect ratio. Black borders if window isn't a multiple.
+        pimpl_->app->userConfig.resolution = RT64::UserConfiguration::Resolution::WindowIntegerScale;
+        pimpl_->app->userConfig.aspectRatio = RT64::UserConfiguration::AspectRatio::Original;
+        fprintf(stderr, "[WPJ2/RT64] Scaling: INTEGER (4:3, black borders if needed)\n");
+    } else {
+        // Stretch to screen: fill entire window, ignore aspect ratio.
+        // No black borders, but image may be distorted if window isn't 4:3.
+        pimpl_->app->userConfig.resolution = RT64::UserConfiguration::Resolution::Original;
+        pimpl_->app->userConfig.aspectRatio = RT64::UserConfiguration::AspectRatio::Expand;
+        fprintf(stderr, "[WPJ2/RT64] Scaling: STRETCH (fill window, may distort)\n");
+    }
+
+    // Apply the new configuration. discardFBs=false to avoid flicker.
+    pimpl_->app->updateUserConfig(false);
+
+    return pimpl_->integer_scaling;
+}
+
+// Global pointer to the active renderer context, set in the constructor.
+// Used by main.cpp's keyboard handler to toggle scaling mode.
+static wpj2::RT64RendererContext* g_active_renderer = nullptr;
+
 std::unique_ptr<ultramodern::renderer::RendererContext>
 create_rt64_render_context(uint8_t* rdram,
                            ultramodern::renderer::WindowHandle window_handle,
                            bool developer_mode)
 {
-    return std::make_unique<RT64RendererContext>(rdram, window_handle, developer_mode);
+    auto ctx = std::make_unique<RT64RendererContext>(rdram, window_handle, developer_mode);
+    g_active_renderer = ctx.get();
+    return ctx;
+}
+
+// Called from main.cpp to toggle scaling. Returns true if integer, false if stretch.
+bool toggle_renderer_scaling() {
+    if (g_active_renderer) {
+        return g_active_renderer->toggle_scaling();
+    }
+    return true;
 }
 
 } // namespace wpj2

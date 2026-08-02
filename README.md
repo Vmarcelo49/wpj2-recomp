@@ -82,6 +82,11 @@ SDL_VIDEODRIVER=wayland ./build/wpj2
 | D-pad | Arrow keys / WASD | D-pad |
 | Analog | — | Left stick |
 
+| Hotkey | Action |
+|---|---|
+| **S** | Toggle integer scaling ↔ stretch to screen |
+| **F11** | Toggle fullscreen |
+
 ## Project Structure
 
 ```
@@ -157,4 +162,3 @@ preservation technique.
 - [RT64](https://github.com/rt64/rt64) — hardware-accelerated N64 renderer
 - [LLONSIT-glitch/wonder](https://github.com/LLONSIT-glitch/wonder) — WPJ2 decompilation
 - [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp) — reference implementation
-- Z.ai This project as a whole was made with GLM 5.2

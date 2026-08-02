@@ -44,6 +44,10 @@ public:
     uint32_t get_display_framerate() const override;
     float get_resolution_scale() const override;
 
+    // Toggle between integer scaling (default) and stretch-to-screen.
+    // Returns true if integer scaling is now active, false if stretch.
+    bool toggle_scaling();
+
 private:
     struct Impl;
     std::unique_ptr<Impl> pimpl_;
