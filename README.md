@@ -22,9 +22,9 @@ This project was fully made with AI, using Z.ai GLM 5.2
 - ✅ 60 FPS stable, no crashes
 
 ### What doesn't work yet
-- Controller Pak (MPK) saves — stubs return PFS_ERR_NOPACK
-- Modern features (high-res, fullscreen toggle, fast-forward) — Phase 7
-- Distribution packaging (AppImage, Windows .exe) — Phase 8
+- Controller Pak (MPK) saves — implemented but not tested, saving may not work.
+- Any additional feature (Fullscreen mode, graphics enhancements, save-states, etc.)
+- Distribution packaging (AppImage, Windows .exe)
 - English patch
 
 ## Quick Start
