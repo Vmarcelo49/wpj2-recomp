@@ -22,6 +22,7 @@ and runs stably for 60+ seconds on real hardware (AMD RX 9070 XT, Wayland).
 - Controller Pak (MPK) saves — stubs return PFS_ERR_NOPACK
 - Modern features (high-res, fullscreen toggle, fast-forward) — Phase 7
 - Distribution packaging (AppImage, Windows .exe) — Phase 8
+- English patch
 
 ## Quick Start
 
