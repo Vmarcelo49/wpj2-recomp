@@ -5,8 +5,11 @@
 
 ## Status
 
-**Phase 6 complete** — The game boots, plays audio, renders graphics via RT64 (Vulkan),
+The game boots, plays audio, renders graphics via RT64 (Vulkan),
 and runs stably for 60+ seconds on real hardware (AMD RX 9070 XT, Wayland).
+
+## AI Notice
+This project was fully made with AI, using Z.ai GLM 5.2
 
 ### What works
 - ✅ Full boot sequence (IPL3 → entrypoint → main game loop)
