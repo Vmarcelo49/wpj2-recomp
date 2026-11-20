@@ -127,7 +127,17 @@ ultramodern::renderer::WindowHandle wpj2_gfx_create_window(void* gfx_data) {
     // return it. The gfx_data pointer carries our SDL_Window* via a global.
     auto* data = static_cast<Wpj2GfxData*>(gfx_data);
     data->window = g_sdl_window;
+#if defined(_WIN32)
+    SDL_SysWMinfo wm_info;
+    SDL_VERSION(&wm_info.version);
+    if (SDL_GetWindowWMInfo(g_sdl_window, &wm_info)) {
+        return ultramodern::renderer::WindowHandle{
+            wm_info.info.win.window, GetCurrentThreadId()};
+    }
+    return ultramodern::renderer::WindowHandle{nullptr, GetCurrentThreadId()};
+#else
     return g_sdl_window;
+#endif
 }
 
 void wpj2_gfx_update_gfx(void* gfx_data) {

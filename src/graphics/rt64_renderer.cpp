@@ -4,6 +4,11 @@
  * Creates an RT64::Application and wires send_dl/update_screen to it.
  */
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <objbase.h>
+#endif
+
 #include "rt64_renderer.hpp"
 
 #include "ultramodern/renderer_context.hpp"
@@ -17,11 +22,6 @@
 #include "librecomp/rsp.hpp"
 
 #include <SDL.h>
-
-#if defined(_WIN32)
-#include <windows.h>
-#include <objbase.h>
-#endif
 
 #include <cstdio>
 #include <cstring>
@@ -64,7 +64,11 @@ static void wpj2_check_interrupts() {
 // ----------------------------------------------------------------------------
 struct RT64RendererContext::Impl {
     uint8_t* rdram = nullptr;
+#if defined(_WIN32)
+    HWND window = nullptr;
+#else
     SDL_Window* window = nullptr;
+#endif
     bool developer_mode = false;
 
     HardwareRegs hw_regs;
@@ -88,7 +92,11 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
     : pimpl_(std::make_unique<Impl>())
 {
     pimpl_->rdram = rdram;
-    pimpl_->window = window_handle;  // On Linux, WindowHandle = SDL_Window*
+#if defined(_WIN32)
+    pimpl_->window = window_handle.window;
+#else
+    pimpl_->window = window_handle;
+#endif
     pimpl_->developer_mode = developer_mode;
 
 #if defined(_WIN32)
