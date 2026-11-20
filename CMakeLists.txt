@@ -249,6 +249,31 @@ else()
     message(STATUS "N64ModernRuntime ControllerPak patch already present")
 endif()
 
+# Guard GCC-only warning flags in the runtime for MSVC builds.
+set(WPJ2_RUNTIME_WARN_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/patches/N64ModernRuntime/msvc-warning-flags.patch")
+set(WPJ2_RUNTIME_LIBRECOMP_CMAKE "${WPJ2_RUNTIME_DIR}/librecomp/CMakeLists.txt")
+file(READ "${WPJ2_RUNTIME_LIBRECOMP_CMAKE}" wpj2_runtime_librecomp_cmake_source)
+string(FIND "${wpj2_runtime_librecomp_cmake_source}" "if (NOT MSVC)" wpj2_warn_patch_marker)
+if(wpj2_warn_patch_marker EQUAL -1)
+    execute_process(
+        COMMAND git -C "${WPJ2_RUNTIME_DIR}" apply --check "${WPJ2_RUNTIME_WARN_PATCH}"
+        RESULT_VARIABLE warn_patch_can_apply
+        OUTPUT_QUIET ERROR_QUIET)
+    if(warn_patch_can_apply EQUAL 0)
+        execute_process(
+            COMMAND git -C "${WPJ2_RUNTIME_DIR}" apply "${WPJ2_RUNTIME_WARN_PATCH}"
+            RESULT_VARIABLE warn_patch_result)
+        if(NOT warn_patch_result EQUAL 0)
+            message(FATAL_ERROR "Applying ${WPJ2_RUNTIME_WARN_PATCH} failed")
+        endif()
+        message(STATUS "Applied N64ModernRuntime patch: msvc-warning-flags.patch")
+    else()
+        message(FATAL_ERROR "Cannot apply ${WPJ2_RUNTIME_WARN_PATCH}; unexpected runtime changes")
+    endif()
+else()
+    message(STATUS "N64ModernRuntime MSVC warning patch already present")
+endif()
+
 set(RT64_SDL_WINDOW_VULKAN ON CACHE BOOL "" FORCE)
 set(RT64_STATIC ON CACHE BOOL "" FORCE)
 # RT64 vendors zstd for static linking; its CLI tools are not release artifacts.
