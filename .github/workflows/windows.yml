@@ -36,11 +36,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set up MSVC developer environment
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build Japanese variant and launcher
         shell: pwsh
         run: |
           cmake -S . -B build-jp -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release -DWPJ2_PCH=OFF
+            -DCMAKE_BUILD_TYPE=Release -DWPJ2_PCH=OFF `
+            -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_RC_COMPILER=rc
           cmake --build build-jp --target wpj2 wpj2-launcher --parallel
 
       - name: Build English variant
@@ -48,6 +52,7 @@ jobs:
         run: |
           cmake -S . -B build-en -G Ninja `
             -DCMAKE_BUILD_TYPE=Release -DWPJ2_PCH=OFF `
+            -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_RC_COMPILER=rc `
             -DWPJ2_ENGLISH_BUILD=ON `
             -DWPJ2_GENERATED_DIR="$PWD/src/game/generated_en"
           cmake --build build-en --target wpj2 --parallel
