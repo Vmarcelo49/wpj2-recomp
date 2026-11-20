@@ -141,11 +141,12 @@ void render_ui(SDL_Renderer* renderer, SDL_Texture* font_texture,
     draw_text(renderer, font_texture, 40, 30, "WONDER PROJECT J2 LAUNCHER", 2, heading);
     draw_text(renderer, font_texture, 40, 86, status_for_paths(config), 1, muted);
 
-    const std::array<std::string, 7> labels = {
+    const std::array<std::string, 8> labels = {
         "VARIANT: " + std::string(wpj2_launcher::variant_name(config.variant) == "jp" ? "JAPANESE" : "ENGLISH"),
         std::string("FULLSCREEN: ") + (config.fullscreen ? "ON" : "OFF"),
         std::string("INTEGER SCALING: ") + (config.integer_scaling ? "ON" : "OFF"),
         "AUDIO VOLUME: " + std::to_string(config.audio_volume),
+        "GRAPHICS: " + config.graphics_api,
         "ENTER - LAUNCH",
         "G - GENERATE EN ROM",
         "S - SAVE / ESC - QUIT",
@@ -229,10 +230,10 @@ int run_ui(const std::filesystem::path& config_path, Config config) {
                         running = false;
                         break;
                     case SDLK_UP:
-                        selected = (selected + 6) % 7;
+                        selected = (selected + 7) % 8;
                         break;
                     case SDLK_DOWN:
-                        selected = (selected + 1) % 7;
+                        selected = (selected + 1) % 8;
                         break;
                     case SDLK_LEFT:
                     case SDLK_RIGHT: {
@@ -245,6 +246,14 @@ int run_ui(const std::filesystem::path& config_path, Config config) {
                             config.integer_scaling = !config.integer_scaling;
                         } else if (selected == 3) {
                             config.audio_volume = std::clamp(config.audio_volume + delta * 5, 0, 100);
+                        } else if (selected == 4) {
+                            const std::array<const char*, 3> apis{"Auto", "D3D12", "Vulkan"};
+                            int current = 0;
+                            for (int i = 0; i < static_cast<int>(apis.size()); ++i) {
+                                if (config.graphics_api == apis[i]) current = i;
+                            }
+                            current = (current + delta + static_cast<int>(apis.size())) % static_cast<int>(apis.size());
+                            config.graphics_api = apis[current];
                         }
                         break;
                     }
@@ -310,6 +319,7 @@ void print_help() {
         "  --integer-scaling   Request integer scaling\n"
         "  --stretch           Request stretched scaling\n"
         "  --volume N          Audio volume 0..100\n"
+        "  --graphics API      Auto, D3D12, or Vulkan\n"
         "  --make-en           Generate canonical EN ROM from JP + IPS when needed\n"
         "  --dry-run           Print the launch plan and exit\n"
         "  --save-config       Save overrides to the config file\n"
@@ -320,7 +330,7 @@ void print_help() {
 bool needs_value(const std::string& arg) {
     return arg == "--config" || arg == "--variant" || arg == "--jp-rom" ||
            arg == "--en-rom" || arg == "--ips" || arg == "--game-jp" ||
-           arg == "--game-en" || arg == "--volume";
+           arg == "--game-en" || arg == "--volume" || arg == "--graphics";
 }
 
 } // namespace
@@ -344,8 +354,10 @@ int main(int argc, char** argv) {
             const std::filesystem::path rom{rom_env};
             if (wpj2_launcher::verify_jp_rom(rom, nullptr)) {
                 config.jp_rom = rom;
+                config.variant = Variant::Jp;
             } else if (wpj2_launcher::verify_en_rom(rom, nullptr)) {
                 config.en_rom = rom;
+                config.variant = Variant::En;
             }
         }
     }
@@ -417,6 +429,7 @@ int main(int argc, char** argv) {
         else if (arg == "--ips") config.ips_patch = value;
         else if (arg == "--game-jp") config.game_jp = value;
         else if (arg == "--game-en") config.game_en = value;
+        else if (arg == "--graphics") config.graphics_api = value;
         else if (arg == "--volume") {
             try {
                 config.audio_volume = std::clamp(std::stoi(value), 0, 100);

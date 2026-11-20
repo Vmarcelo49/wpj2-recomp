@@ -274,6 +274,14 @@ Config load_config(const std::filesystem::path& path, std::string* error) {
         set_error(error, "invalid audio_volume: " + volume);
     }
     config.audio_volume = std::clamp(config.audio_volume, 0, 100);
+
+    const auto api = get_or(values, "graphics_api", config.graphics_api);
+    if (api == "Auto" || api == "auto" || api == "D3D12" || api == "d3d12" ||
+        api == "Vulkan" || api == "vulkan" || api == "Metal" || api == "metal") {
+        config.graphics_api = api;
+    } else {
+        set_error(error, "invalid graphics_api: " + api);
+    }
     return config;
 }
 
@@ -303,6 +311,7 @@ bool save_config(const std::filesystem::path& path, const Config& config, std::s
          << "fullscreen=" << (config.fullscreen ? 1 : 0) << "\n"
          << "integer_scaling=" << (config.integer_scaling ? 1 : 0) << "\n"
          << "audio_volume=" << config.audio_volume << "\n"
+         << "graphics_api=" << config.graphics_api << "\n"
          << "skip_launcher=" << (config.skip_launcher ? 1 : 0) << "\n";
     return bool(file);
 }
@@ -423,7 +432,10 @@ bool discover_roms(Config& config) {
             }
         }
     }
-    if (found && !verify_jp_rom(config.jp_rom, nullptr)) {
+    // If only a Japanese ROM was found, pre-fill the expected English ROM path
+    // in the same folder, but never replace an explicitly supplied path.
+    if (found && !verify_jp_rom(config.jp_rom, nullptr) &&
+        !verify_en_rom(config.en_rom, nullptr)) {
         config.en_rom = config.jp_rom.parent_path() / "wpj2.en.z64";
     }
     return found;
@@ -607,6 +619,7 @@ LaunchPlan make_plan(const Config& config, bool generate_en, std::string* error)
     plan.environment.emplace_back("WPJ2_FULLSCREEN", config.fullscreen ? "1" : "0");
     plan.environment.emplace_back("WPJ2_INTEGER_SCALING", config.integer_scaling ? "1" : "0");
     plan.environment.emplace_back("WPJ2_AUDIO_VOLUME", std::to_string(config.audio_volume));
+    plan.environment.emplace_back("WPJ2_GRAPHICS_API", config.graphics_api);
     return plan;
 }
 

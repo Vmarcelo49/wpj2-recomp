@@ -23,6 +23,7 @@ struct Config {
     bool fullscreen = false;
     bool integer_scaling = true;
     int audio_volume = 100;
+    std::string graphics_api = "Auto";
     bool skip_launcher = false;
 };
 

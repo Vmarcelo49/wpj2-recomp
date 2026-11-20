@@ -61,3 +61,7 @@ vibrate a physical controller. WPJ2 does not use rumble for gameplay.
 
 Press **F9** to toggle integer scaling and stretch-to-screen. The older `S`
 hotkey conflicted with D-pad Down and was removed.
+
+## Graphics API
+
+The launcher can choose **Auto**, **D3D12**, or **Vulkan**. Auto selects D3D12 on Windows and Vulkan on other platforms. If a backend fails to initialize, try a different option. The choice is exported as `WPJ2_GRAPHICS_API` to the game.

@@ -28,7 +28,8 @@ export WPJ2_DATA_DIR="$root/usr/share/wpj2"
 export WPJ2_PATCH_DIR="$WPJ2_DATA_DIR/patches"
 export WPJ2_TRANSLATION_PATCH="$WPJ2_PATCH_DIR/Wpj2e_v1_z64.ips"
 export LD_LIBRARY_PATH="$root/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export XDG_DATA_DIRS="$root/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+# Keep the standard paths so the Vulkan loader can still find system ICD files.
+export XDG_DATA_DIRS="$root/usr/share:/usr/local/share:/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
 
 if [ -z "${WPJ2_CONFIG_DIR:-}" ]; then
     config_home=""

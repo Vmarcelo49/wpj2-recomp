@@ -24,6 +24,7 @@
 #include <SDL.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <atomic>
 #include <memory>
@@ -77,6 +78,8 @@ struct RT64RendererContext::Impl {
     std::unique_ptr<RT64::Application> app;
     RT64::Application::SetupResult setup_result = RT64::Application::SetupResult::Success;
     bool integer_scaling = true;  // default: integer scaling
+    ultramodern::renderer::GraphicsApi graphics_api =
+        ultramodern::renderer::GraphicsApi::Auto;
     bool valid_ = false;
     bool initialized = false;
 
@@ -164,7 +167,20 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
 
     pimpl_->app = std::make_unique<RT64::Application>(core, app_config);
 
-    // Setup (creates Vulkan device, swapchain, etc.)
+    // Automatic resolves to D3D12 on Windows and Vulkan elsewhere. Users can
+    // force a backend with WPJ2_GRAPHICS_API=auto|d3d12|vulkan|metal.
+    const char* api = std::getenv("WPJ2_GRAPHICS_API");
+    if (api != nullptr) {
+        if (std::strcmp(api, "d3d12") == 0 || std::strcmp(api, "D3D12") == 0) {
+            pimpl_->app->userConfig.graphicsAPI = RT64::UserConfiguration::GraphicsAPI::D3D12;
+        } else if (std::strcmp(api, "vulkan") == 0 || std::strcmp(api, "Vulkan") == 0) {
+            pimpl_->app->userConfig.graphicsAPI = RT64::UserConfiguration::GraphicsAPI::Vulkan;
+        } else if (std::strcmp(api, "metal") == 0 || std::strcmp(api, "Metal") == 0) {
+            pimpl_->app->userConfig.graphicsAPI = RT64::UserConfiguration::GraphicsAPI::Metal;
+        }
+    }
+
+    // Setup (creates the graphics device, swapchain, etc.)
     uint32_t thread_id = 0;  // Current thread ID — RT64 uses this for profiling
     pimpl_->setup_result = pimpl_->app->setup(thread_id);
 
@@ -181,8 +197,9 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
         }
         fprintf(stderr, "[WPJ2/RT64] Application setup successful\n");
     } else {
-        fprintf(stderr, "[WPJ2/RT64] Application setup FAILED (result=%d)\n",
-                (int)pimpl_->setup_result);
+        fprintf(stderr, "[WPJ2/RT64] Application setup FAILED (result=%d, api=%d)\n",
+                (int)pimpl_->setup_result,
+                (int)pimpl_->app->chosenGraphicsAPI);
         pimpl_->valid_ = false;
     }
 }
@@ -217,7 +234,18 @@ ultramodern::renderer::SetupResult RT64RendererContext::get_setup_result() const
 }
 
 ultramodern::renderer::GraphicsApi RT64RendererContext::get_chosen_api() const {
-    return ultramodern::renderer::GraphicsApi::Vulkan;
+    if (!pimpl_->app) return pimpl_->graphics_api;
+
+    switch (pimpl_->app->chosenGraphicsAPI) {
+        case RT64::UserConfiguration::GraphicsAPI::D3D12:
+            return ultramodern::renderer::GraphicsApi::D3D12;
+        case RT64::UserConfiguration::GraphicsAPI::Vulkan:
+            return ultramodern::renderer::GraphicsApi::Vulkan;
+        case RT64::UserConfiguration::GraphicsAPI::Metal:
+            return ultramodern::renderer::GraphicsApi::Metal;
+        default:
+            return ultramodern::renderer::GraphicsApi::Auto;
+    }
 }
 
 bool RT64RendererContext::update_config(

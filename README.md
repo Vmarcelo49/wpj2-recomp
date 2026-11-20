@@ -82,6 +82,7 @@ The launcher is the first screen you see. Use **Up/Down** to pick a row and
 | Fullscreen | On / Off |
 | Integer scaling | On (sharp 4:3 with borders) / Off (fill window) |
 | Audio volume | 0–100 |
+| Graphics API | Auto, D3D12, or Vulkan |
 
 Press **Enter** to start the game, **S** to save your settings, and **Esc** to
 quit. Press **G** to generate the English ROM from your Japanese ROM and the
@@ -126,7 +127,7 @@ not mix Japanese and English save folders.
 | Problem | What to try |
 |---|---|
 | "ROM NOT DETECTED" | Put the Japanese `.z64` beside the executable/AppImage, then press **Check for Rom**. The ROM must be the original Japanese game (MD5 above). |
-| Black screen or Vulkan error | Update your graphics drivers. On Linux Wayland, try `SDL_VIDEODRIVER=wayland` before the executable name. |
+| Black screen or Vulkan error | Select **D3D12** (Windows) or **Vulkan** (Linux) in the launcher graphics setting and update your graphics drivers. On Linux Wayland, try `SDL_VIDEODRIVER=wayland` before the executable name. |
 | AppImage will not open | Give it execute permission, or install FUSE. Otherwise try `--appimage-extract-and-run`. |
 | Windows says a DLL is missing | Re-extract the entire ZIP; the `.exe` must stay with its DLL files. |
 | No sound | Check your system volume and the launcher's audio volume setting. |
