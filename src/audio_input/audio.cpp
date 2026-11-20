@@ -13,7 +13,7 @@
 
 #include "audio.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <cstdio>
 #include <cstring>

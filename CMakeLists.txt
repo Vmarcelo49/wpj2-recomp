@@ -26,6 +26,10 @@ if(NOT CMAKE_GENERATOR)
     set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "")
 endif()
 
+if(WIN32)
+    add_compile_definitions(NOMINMAX)
+endif()
+
 # C++20 / C17 standard
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)

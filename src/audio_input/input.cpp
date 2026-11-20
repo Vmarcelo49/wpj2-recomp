@@ -4,7 +4,7 @@
 
 #include "input.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <cmath>
 #include <cstdio>

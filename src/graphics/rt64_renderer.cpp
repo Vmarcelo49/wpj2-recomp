@@ -16,7 +16,7 @@
 // librecomp RSP (for dmem)
 #include "librecomp/rsp.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <cstdio>
 #include <cstring>
