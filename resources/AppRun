@@ -1,0 +1,76 @@
+#!/bin/sh
+# AppImage entry point for wpj2-recomp.
+set -eu
+
+resolve_dir() {
+    CDPATH= cd -- "$1" 2>/dev/null && pwd
+}
+
+if [ -n "${APPDIR:-}" ] && [ -d "$APPDIR/usr/bin" ]; then
+    root="$APPDIR"
+else
+    self=$0
+    if command -v readlink >/dev/null 2>&1; then
+        resolved=$(readlink -f -- "$self" 2>/dev/null || true)
+        [ -n "$resolved" ] && self=$resolved
+    fi
+    root=$(resolve_dir "$(dirname -- "$self")")
+fi
+
+# AppImage sets APPIMAGE to the user-visible executable. Publish its folder so
+# the launcher can find a ROM placed beside the AppImage.
+if [ -n "${APPIMAGE:-}" ]; then
+    WPJ2_LAUNCH_DIR=$(resolve_dir "$(dirname -- "$APPIMAGE")")
+    export WPJ2_LAUNCH_DIR
+fi
+
+export WPJ2_DATA_DIR="$root/usr/share/wpj2"
+export WPJ2_PATCH_DIR="$WPJ2_DATA_DIR/patches"
+export WPJ2_TRANSLATION_PATCH="$WPJ2_PATCH_DIR/Wpj2e_v1_z64.ips"
+export LD_LIBRARY_PATH="$root/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="$root/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+
+if [ -z "${WPJ2_CONFIG_DIR:-}" ]; then
+    config_home=""
+    if [ -n "${XDG_CONFIG_HOME:-}" ]; then
+        config_home=$XDG_CONFIG_HOME
+    elif [ -n "${HOME:-}" ]; then
+        config_home=$HOME/.config
+    fi
+    if [ -n "$config_home" ]; then
+        WPJ2_CONFIG_DIR="$config_home/wpj2-recomp-appimage"
+        export WPJ2_CONFIG_DIR
+    fi
+fi
+
+# Allow opening a ROM from a file manager or passing it as the first argument.
+if [ -z "${WPJ2_ROM:-}" ] && [ "$#" -gt 0 ] && [ -f "$1" ]; then
+    rom=$1
+    if command -v readlink >/dev/null 2>&1; then
+        resolved=$(readlink -f -- "$rom" 2>/dev/null || true)
+        [ -n "$resolved" ] && rom=$resolved
+    fi
+    WPJ2_ROM=$rom
+    export WPJ2_ROM
+    shift
+fi
+
+if [ -x "$root/usr/bin/wpj2-launcher" ] && [ -z "${WPJ2_LANGUAGE:-}" ]; then
+    set -- --ips "$WPJ2_TRANSLATION_PATCH" \
+        --game-jp "$root/usr/bin/wpj2-jp" \
+        --game-en "$root/usr/bin/wpj2-en" \
+        "$@"
+    exec "$root/usr/bin/wpj2-launcher" "$@"
+fi
+
+binary="$root/usr/bin/wpj2-jp"
+if [ -n "${WPJ2_LANGUAGE:-}" ]; then
+    case "$WPJ2_LANGUAGE" in
+        en|english) binary="$root/usr/bin/wpj2-en" ;;
+        jp|japanese) binary="$root/usr/bin/wpj2-jp" ;;
+        *) printf 'error: unknown WPJ2_LANGUAGE=%s\n' "$WPJ2_LANGUAGE" >&2; exit 1 ;;
+    esac
+elif [ -x "$root/usr/bin/wpj2-en" ] && [ ! -x "$root/usr/bin/wpj2-jp" ]; then
+    binary="$root/usr/bin/wpj2-en"
+fi
+exec "$binary" "$@"

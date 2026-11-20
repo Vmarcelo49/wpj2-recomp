@@ -20,6 +20,7 @@
 #include <mutex>
 #include <atomic>
 #include <algorithm>
+#include <vector>
 
 namespace wpj2 {
 
@@ -28,6 +29,7 @@ namespace {
     SDL_AudioDeviceID g_device = 0;
     SDL_AudioSpec g_spec{};
     std::atomic<uint32_t> g_freq{0};
+    std::atomic<int> g_volume{100};
     bool g_initialized = false;
 
     // Target buffer size: ~50ms of audio (3 frames at 60Hz).
@@ -107,9 +109,26 @@ void audio_queue_samples(int16_t* samples, size_t count) {
         }
     }
 
+    const int volume = g_volume.load();
+    if (volume < 100) {
+        std::vector<int16_t> scaled(count);
+        const int numerator = std::clamp(volume, 0, 100);
+        for (size_t i = 0; i < count; ++i) {
+            scaled[i] = static_cast<int16_t>((int32_t(samples[i]) * numerator) / 100);
+        }
+        if (SDL_QueueAudio(g_device, scaled.data(), (Uint32)(scaled.size() * sizeof(int16_t))) < 0) {
+            fprintf(stderr, "[WPJ2/Audio] SDL_QueueAudio failed: %s\n", SDL_GetError());
+        }
+        return;
+    }
+
     if (SDL_QueueAudio(g_device, samples, (Uint32)bytes) < 0) {
         fprintf(stderr, "[WPJ2/Audio] SDL_QueueAudio failed: %s\n", SDL_GetError());
     }
+}
+
+void audio_set_volume(int volume) {
+    g_volume.store(std::clamp(volume, 0, 100));
 }
 
 size_t audio_get_frames_remaining() {

@@ -114,7 +114,7 @@ ROM Layout (simplified):
 
 ## Fan Translation
 
-A fan translation to English exists (patch at Vimm's ROM hacking, entry #1074). The patch expands the ROM to ~8.5MB. This is a separate concern from recomp — translation would be applied to assets post-recomp, not to the build pipeline.
+A fan translation to English exists (patch at Vimm's ROM hacking, entry #1074). The patch expands the ROM to ~8.5MB and changes executable code as well as data. The native recomp therefore needs CPU sources regenerated from the translated ROM; a runtime-only asset swap stalls. See [English Translation](13-english-patch.md).
 
 ## Emulation Issues
 

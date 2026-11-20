@@ -17,9 +17,9 @@
 | **R9** | SP events lossy causa hang | Alto | Médio | Manter `requeue_sp=false`. Documentar como comportamento esperado. | Se jogo específico precisa SP confiável: implementar no runtime |
 | **R10** | N64Recomp não suporta ROM + symbols.toml (sem ELF) nativamente | Médio | Médio | **Usar ELF do decomp** (caminho padrão). Thiago fez patches custom; evitar replicar. | Se ELF do decomp não buildar: investigar patches do Thiago no fork dele |
 | **R11** | Controller Pak não implementado no N64ModernRuntime | Médio | Alto | Verificar suporte existente. Se ausente, implementar MPK file system (doc 05). | Se muito complexo: usar save state como workaround temporário |
-| **R12** | Fan translation expande ROM → quebra offsets | Baixo | Baixo | Não aplicar translation no build. Translation é post-recomp (asset swap). | N/A |
+| **R12** | Fan translation expande ROM e altera código → execução inconsistente | Médio | Médio | Regenerar CPU a partir do ROM traduzido e usar build separado. Ver doc 13. | N/A |
 | **R13** | Qualidade visual inferior ao emulador (Thiago criticado) | Médio | Médio | Validar visual vs Ares/cen64 em cada fase. Suite de regressão com screenshots. | Se insatisfatório: investir mais em Phase 6/7 |
-| **R14** | i18n / texto japonês encoding custom | Baixo | Baixo | Recomp não decodifica texto — só passa IDs. Para translation futura: romhack separado. | N/A |
+| **R14** | i18n / texto japonês encoding custom | Baixo | Baixo | Recomp não decodifica texto — só passa IDs. A tradução altera tabelas e código; ver doc 13. | N/A |
 | **R15** | Problemas legais / DMCA | Muito Baixo | Crítico | Não distribuir ROM/assets. User brings own ROM. Código é reimplementação. | Se notificação: remover repo, manter local |
 
 ## Risk Categories

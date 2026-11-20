@@ -19,19 +19,19 @@
  *   0x0003 = last page of a file
  *   other  = next page number in file chain
  *
- * Directory entry (32 bytes):
- *   0x00: company_code (2 bytes)
- *   0x02: game_code (2 bytes)
- *   0x04: note_name (5 bytes, space-padded)
- *   0x09: ext_name (1 byte)
- *   0x0A: reserved (1 byte)
- *   0x0B: num_blocks (1 byte)
- *   0x0C: first_page (2 bytes)
- *   0x0E: reserved (2 bytes)
- *   0x10: status (4 bytes, bit 4 = validated)
- *   0x14: copy_flag (1 byte)
- *   0x15: checksum (2 bytes, XOR of bytes 0x00-0x14)
- *   0x17: padding (15 bytes)
+ * Directory entry (32 bytes, internal layout):
+ *   0x00: company_code (2 bytes, big-endian)
+ *   0x02: game_code (4 bytes, big-endian)
+ *   0x06: game_name (16 bytes)
+ *   0x16: ext_name (4 bytes)
+ *   0x1A: num_blocks (1 byte)
+ *   0x1B: first_page (2 bytes, big-endian)
+ *   0x1D: status (1 byte)
+ *   0x1E: checksum (1 byte)
+ *   0x1F: reserved
+ *
+ * OSPfsState is filled in libultra order: file_size, game_code, company_code,
+ * ext_name[4], game_name[16].
  */
 
 #include "recomp.h"
@@ -74,7 +74,8 @@
 #define OSPFS_MINODE_TBL 88   // int (page number)
 #define OSPFS_DIR_TBL    92   // int (page number)
 #define OSPFS_INODE_SP   96   // int (inode start page)
-#define OSPFS_ACTIVEBANK 102  // u8
+#define OSPFS_BANKS      100  // u8
+#define OSPFS_ACTIVEBANK 101  // u8
 
 // Inode values
 #define INODE_FREE       0x0001
@@ -86,6 +87,14 @@ std::mutex g_pak_mutex;
 
 // Get the path for the pak file
 std::filesystem::path pak_path(int channel) {
+    const char* config = getenv("WPJ2_CONFIG_DIR");
+    if (config != nullptr && *config != '\0') {
+        auto dir = std::filesystem::path(config);
+        std::error_code ec;
+        std::filesystem::create_directories(dir, ec);
+        return dir / ("controller_pak_" + std::to_string(channel) + ".bin");
+    }
+
     const char* home = getenv("HOME");
     if (!home) home = "/tmp";
     auto dir = std::filesystem::path(home) / ".config" / "wpj2-recomp";
@@ -136,6 +145,9 @@ void save_pak(int channel, const uint8_t* ram) {
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
     if (out.is_open()) {
         out.write(reinterpret_cast<const char*>(ram), PAK_RAM_SIZE);
+        fprintf(stderr, "[WPJ2/PFS] saved %s\n", path.c_str());
+    } else {
+        fprintf(stderr, "[WPJ2/PFS] failed to save %s\n", path.c_str());
     }
 }
 
@@ -170,7 +182,7 @@ void init_pfs_struct(uint8_t* rdram, gpr pfs_ptr, int channel) {
     MEM_W(OSPFS_MINODE_TBL, pfs_ptr) = PAK_MINODE_PAGE;
     MEM_W(OSPFS_DIR_TBL, pfs_ptr) = PAK_DIR_PAGE;
     MEM_W(OSPFS_INODE_SP, pfs_ptr) = PAK_DATA_START;
-    // activebank
+    MEM_BU(OSPFS_BANKS, pfs_ptr) = 1;
     MEM_BU(OSPFS_ACTIVEBANK, pfs_ptr) = 0;
 }
 
@@ -201,11 +213,9 @@ int find_file(const uint8_t* ram, u16 company, u32 gamecode,
         if (entry_company != company) continue;
         if (entry_game != gamecode) continue;
 
-        // Compare note name (5 bytes)
-        if (note_name && memcmp(entry + 6, note_name, 5) != 0) continue;
-
-        // Compare extension (1 byte)
-        if (ext_name && entry[11] != *ext_name) continue;
+        // Compare the full libultra note name and extension.
+        if (note_name && memcmp(entry + 6, note_name, 16) != 0) continue;
+        if (ext_name && memcmp(entry + 22, ext_name, 4) != 0) continue;
 
         return i;
     }
@@ -421,9 +431,9 @@ extern "C" void __osPfsSelectBank_recomp(uint8_t* rdram, recomp_context* ctx) {
 // ============================================================================
 
 extern "C" void osPfsInit_recomp(uint8_t* rdram, recomp_context* ctx) {
-    // Args: r4 = OSPfs*, r5 = OSMesgQueue* (or channel), r6 = channel (if 3-arg)
-    // Based on generated code: r4 = OSPfs*, r5 = mq, r6 = channel
-    gpr pfs_ptr = ctx->r4;
+    // libultra signature: osPfsInit(OSMesgQueue* mq, OSPfs* pfs, int channel)
+    gpr mq_ptr = ctx->r4;
+    gpr pfs_ptr = ctx->r5;
     int channel = (int)ctx->r6;
 
     std::lock_guard<std::mutex> lock(g_pak_mutex);
@@ -436,7 +446,7 @@ extern "C" void osPfsInit_recomp(uint8_t* rdram, recomp_context* ctx) {
     // Set up OSPfs struct
     if (pfs_ptr != 0) {
         MEM_W(OSPFS_STATUS, pfs_ptr) = 1; // PFS_INITIALIZED
-        MEM_W(OSPFS_QUEUE, pfs_ptr) = ctx->r5; // store mq
+        MEM_W(OSPFS_QUEUE, pfs_ptr) = mq_ptr; // store mq
         MEM_W(OSPFS_CHANNEL, pfs_ptr) = channel;
         MEM_W(OSPFS_DIR_SIZE, pfs_ptr) = PFS_MAX_FILES;
         MEM_W(OSPFS_INODE_TBL, pfs_ptr) = PAK_INODE_PAGE;
@@ -488,16 +498,16 @@ extern "C" void osPfsFindFile_recomp(uint8_t* rdram, recomp_context* ctx) {
     }
 
     // Read note_name and ext_name from RDRAM
-    uint8_t note[5] = {0};
-    uint8_t ext = 0;
+    uint8_t note[16] = {0};
+    uint8_t ext[4] = {0};
     if (note_ptr) {
-        for (int i = 0; i < 5; i++) note[i] = MEM_BU(0, note_ptr + i);
+        for (int i = 0; i < 16; i++) note[i] = MEM_BU(0, note_ptr + i);
     }
     if (ext_ptr) {
-        ext = MEM_BU(0, ext_ptr);
+        for (int i = 0; i < 4; i++) ext[i] = MEM_BU(0, ext_ptr + i);
     }
 
-    int idx = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? &ext : nullptr);
+    int idx = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? ext : nullptr);
     if (idx >= 0) {
         if (file_no_ptr) MEM_W(0, file_no_ptr) = idx;
         ctx->r2 = 0; // found
@@ -535,12 +545,12 @@ extern "C" void osPfsAllocateFile_recomp(uint8_t* rdram, recomp_context* ctx) {
     }
 
     // Check if file already exists
-    uint8_t note[5] = {0};
-    uint8_t ext = 0;
-    if (note_ptr) for (int i = 0; i < 5; i++) note[i] = MEM_BU(0, note_ptr + i);
-    if (ext_ptr) ext = MEM_BU(0, ext_ptr);
+    uint8_t note[16] = {0};
+    uint8_t ext[4] = {0};
+    if (note_ptr) for (int i = 0; i < 16; i++) note[i] = MEM_BU(0, note_ptr + i);
+    if (ext_ptr) for (int i = 0; i < 4; i++) ext[i] = MEM_BU(0, ext_ptr + i);
 
-    int existing = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? &ext : nullptr);
+    int existing = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? ext : nullptr);
     if (existing >= 0) {
         ctx->r2 = PFS_ERR_EXIST;
         return;
@@ -573,28 +583,27 @@ extern "C" void osPfsAllocateFile_recomp(uint8_t* rdram, recomp_context* ctx) {
     entry[3] = (gamecode >> 16) & 0xFF;
     entry[4] = (gamecode >> 8) & 0xFF;
     entry[5] = gamecode & 0xFF;
-    // Note name (5 bytes, space-padded)
+    // Full libultra note name (16 bytes) and extension (4 bytes).
     if (note_ptr) {
-        for (int i = 0; i < 5; i++) entry[6 + i] = MEM_BU(0, note_ptr + i);
+        for (int i = 0; i < 16; i++) entry[6 + i] = MEM_BU(0, note_ptr + i);
     } else {
-        memset(entry + 6, ' ', 5);
+        memset(entry + 6, ' ', 16);
     }
-    // Extension (1 byte)
-    entry[11] = ext_ptr ? MEM_BU(0, ext_ptr) : ' ';
+    if (ext_ptr) {
+        for (int i = 0; i < 4; i++) entry[22 + i] = MEM_BU(0, ext_ptr + i);
+    } else {
+        memset(entry + 22, ' ', 4);
+    }
     // Number of blocks (pages)
-    entry[12] = (uint8_t)num_pages;
+    entry[26] = (uint8_t)num_pages;
     // First page (big-endian 2 bytes)
-    entry[13] = (first_page >> 8) & 0xFF;
-    entry[14] = first_page & 0xFF;
-    // Status (bit 4 = validated)
-    entry[16] = 0x10; // validated
-    // Copy flag
-    entry[20] = 0; // original
-
-    // Calculate checksum (XOR of bytes 0-20)
+    entry[27] = (first_page >> 8) & 0xFF;
+    entry[28] = first_page & 0xFF;
+    // Status and checksum.
+    entry[29] = 0x10;
     uint8_t checksum = 0;
-    for (int i = 0; i < 21; i++) checksum ^= entry[i];
-    entry[21] = checksum;
+    for (int i = 0; i < 29; i++) checksum ^= entry[i];
+    entry[30] = checksum;
 
     save_pak(channel, ram);
 
@@ -638,9 +647,11 @@ extern "C" void osPfsReadWriteFile_recomp(uint8_t* rdram, recomp_context* ctx) {
     }
 
     // Get first page (big-endian)
-    int first_page = (entry[13] << 8) | entry[14];
+    int first_page = (entry[27] << 8) | entry[28];
 
     // Read/write data
+    fprintf(stderr, "[WPJ2/PFS] osPfsReadWriteFile: file=%d mode=%s offset=%d size=%d\n",
+            file_no, mode == 1 ? "WRITE" : "READ", offset, size);
     access_file_data(ram, first_page, offset, size, rdram, buffer_ptr, mode == 1);
 
     if (mode == 1) {
@@ -666,12 +677,12 @@ extern "C" void osPfsDeleteFile_recomp(uint8_t* rdram, recomp_context* ctx) {
         return;
     }
 
-    uint8_t note[5] = {0};
-    uint8_t ext = 0;
-    if (note_ptr) for (int i = 0; i < 5; i++) note[i] = MEM_BU(0, note_ptr + i);
-    if (ext_ptr) ext = MEM_BU(0, ext_ptr);
+    uint8_t note[16] = {0};
+    uint8_t ext[4] = {0};
+    if (note_ptr) for (int i = 0; i < 16; i++) note[i] = MEM_BU(0, note_ptr + i);
+    if (ext_ptr) for (int i = 0; i < 4; i++) ext[i] = MEM_BU(0, ext_ptr + i);
 
-    int idx = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? &ext : nullptr);
+    int idx = find_file(ram, company, gamecode, note_ptr ? note : nullptr, ext_ptr ? ext : nullptr);
     if (idx < 0) {
         ctx->r2 = PFS_ERR_INVALID;
         return;
@@ -680,7 +691,7 @@ extern "C" void osPfsDeleteFile_recomp(uint8_t* rdram, recomp_context* ctx) {
     // Get first page and free the chain
     uint8_t* dir = ram + PAK_DIR_PAGE * PAK_PAGE_SIZE;
     uint8_t* entry = dir + idx * PFS_DIR_ENTRY_SIZE;
-    int first_page = (entry[13] << 8) | entry[14];
+    int first_page = (entry[27] << 8) | entry[28];
     free_pages(ram, first_page);
 
     // Clear directory entry
@@ -716,6 +727,7 @@ extern "C" void osPfsNumFiles_recomp(uint8_t* rdram, recomp_context* ctx) {
     if (max_ptr) MEM_W(0, max_ptr) = PFS_MAX_FILES;
     if (used_ptr) MEM_W(0, used_ptr) = used;
     ctx->r2 = 0;
+    fprintf(stderr, "[WPJ2/PFS] osPfsNumFiles: max=%d used=%d\n", PFS_MAX_FILES, used);
 }
 
 extern "C" void osPfsFileState_recomp(uint8_t* rdram, recomp_context* ctx) {
@@ -744,22 +756,26 @@ extern "C" void osPfsFileState_recomp(uint8_t* rdram, recomp_context* ctx) {
         return;
     }
 
-    // Write file state to RDRAM (OSPfsState struct)
+    // OSPfsState from os_pfs.h is packed as:
+    //   file_size(4), game_code(4), company_code(2), ext_name[4], game_name[16]
+    // so ext_name is at offset 10 and game_name at offset 14.
     if (state_ptr) {
-        // company (2 bytes at offset 0)
-        MEM_W(0, state_ptr) = (entry[0] << 24) | (entry[1] << 16);
-        // game_code (4 bytes at offset 4)
-        MEM_W(4, state_ptr) = (entry[2] << 24) | (entry[3] << 16) | (entry[4] << 8) | entry[5];
-        // note_name (5 bytes at offset 8)
-        for (int i = 0; i < 5; i++) MEM_BU(8 + i, state_ptr) = entry[6 + i];
-        // ext (1 byte at offset 13)
-        MEM_BU(13, state_ptr) = entry[11];
-        // num_bytes (4 bytes at offset 16) = pages * 256
-        int num_pages = entry[12];
-        MEM_W(16, state_ptr) = num_pages * PAK_PAGE_SIZE;
+        int num_pages = entry[26];
+        MEM_W(0, state_ptr) = num_pages * PAK_PAGE_SIZE;
+        MEM_W(4, state_ptr) = (entry[2] << 24) | (entry[3] << 16) |
+                              (entry[4] << 8) | entry[5];
+        MEM_BU(8, state_ptr) = entry[0];
+        MEM_BU(9, state_ptr) = entry[1];
+        for (int i = 0; i < 4; i++) MEM_BU(10 + i, state_ptr) = entry[22 + i];
+        for (int i = 0; i < 16; i++) MEM_BU(14 + i, state_ptr) = entry[6 + i];
     }
 
     ctx->r2 = 0;
+    fprintf(stderr,
+            "[WPJ2/PFS] osPfsFileState: file=%d company=%04X game=%08X size=%d name=%.16s ext=%.4s\n",
+            file_no, (entry[0] << 8) | entry[1],
+            (entry[2] << 24) | (entry[3] << 16) | (entry[4] << 8) | entry[5],
+            entry[26] * PAK_PAGE_SIZE, entry + 6, entry + 22);
 }
 
 extern "C" void osPfsFreeBlocks_recomp(uint8_t* rdram, recomp_context* ctx) {

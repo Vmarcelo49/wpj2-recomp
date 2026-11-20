@@ -89,7 +89,7 @@ See [Save System](05-save-system.md) for full spec.
 - Encoding: Likely Shift-JIS or custom
 - Font: Bitmap font loaded from ROM (not system font)
 - **For recomp:** Irrelevant — code just manipulates character IDs. Text rendering is display lists.
-- **For future translation:** Separate romhack project. Recomp enables it by making asset replacement possible.
+- **For translation:** The fan patch changes both text data and executable code. Regenerate the CPU from the translated ROM; see [English Translation](13-english-patch.md).
 
 ### Peripheral Interactions (from parallel-n64 #358)
 

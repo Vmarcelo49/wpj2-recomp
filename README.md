@@ -1,168 +1,153 @@
-# Wonder Project J2 — PC Recompilation
+# Wonder Project J2 — Recompiled
 
-> Native PC port of *Wonder Project J2* (ワープロジェクトJ2), Enix/Givro, 1996, N64.
-> Built using the N64Recomp methodology with RT64 hardware-accelerated renderer.
+A native PC port of *Wonder Project J2: Koruro no Mori no Josette* (ワープロジェクトJ2),
+the 1996 Enix/Givro adventure for Nintendo 64. It is a recompilation, not an
+emulator: the game runs as a normal PC program, with a Vulkan renderer and PC
+audio/input. Both the original Japanese text and a full English text fan
+translation are playable.
 
-## Status
+This project was created with AI assistance (Z.ai GLM 5.2).
 
-The game boots, plays audio, renders graphics via RT64 (Vulkan),
-and runs stably for 60+ seconds on real hardware (AMD RX 9070 XT, Wayland).
+## Supported platforms
 
-## AI Notice
-This project was fully made with AI, using Z.ai GLM 5.2
+| Platform | Download | Requirements |
+|---|---|---|
+| Linux | AppImage (`WPJ2-Recomp-full-x86_64.AppImage`) | Vulkan-capable GPU and current graphics drivers |
+| Windows 10/11 (64-bit) | ZIP (`wpj2-windows-x64-<version>.zip`) | Vulkan-capable GPU and current graphics drivers |
 
-### What works
-- ✅ Full boot sequence (IPL3 → entrypoint → main game loop)
-- ✅ 8547 recompiled MIPS functions (N64Recomp)
-- ✅ RSP audio microcode (aspMain) via RSPRecomp with 904 indirect branch targets
-- ✅ RT64 Vulkan renderer with HLE GBI display list interpretation
-- ✅ SDL2 audio (queue-based, auto-frequency switching)
-- ✅ SDL2 input (keyboard + gamepad, hot-plug)
-- ✅ Wayland + X11 display support
-- ✅ 60 FPS stable, no crashes
+There is no macOS build. A reasonably modern PC (4+ CPU cores, 8+ GB RAM) is
+recommended. The game runs at 60 FPS on tested hardware.
 
-### What doesn't work yet
-- Controller Pak (MPK) saves — implemented but not tested, saving may not work.
-- Any additional feature (Fullscreen mode, graphics enhancements, save-states, etc.)
-- Distribution packaging (AppImage, Windows .exe)
-- English patch
+**No ROM is included.** You must supply your own legally obtained Japanese
+copy of the game in `.z64` format.
 
-## Quick Start
+## What you need
 
-### Prerequisites
+1. The release file for your platform (AppImage or Windows ZIP).
+2. Your own Japanese Wonder Project J2 ROM (`.z64`). Its MD5 must be
+   `0ff1f8628d8fe69582db54572d2bea79`.
+3. A Vulkan-capable graphics card with up-to-date drivers (Intel, AMD or
+   NVIDIA).
 
-- **Linux** (tested on Ubuntu 24.04 and Arch Linux)
-- **Vulkan-capable GPU** with drivers (Intel, AMD, or NVIDIA)
-- **CMake 3.24+**, **Ninja**, **gcc 13+** or **clang 16+**
-- **SDL2** development libraries
-- **ccache** (recommended for faster rebuilds)
-- **mold** linker (recommended)
-- **Python 3** with `xxhash` package (for ROM hash verification)
-- **ROM** of Wonder Project J2 (Japanese, `.z64` format, MD5: `0ff1f8628d8fe69582db54572d2bea79`)
+## Install and run
 
-### Build
+### Linux
 
-```bash
-# Clone with submodules
-git clone --recursive https://github.com/Vmarcelo49/wpj2-recomp.git
-cd wpj2-recomp
+1. Download the AppImage and make it executable:
 
-# Build N64Recomp + RSPRecomp tools (one-time)
-cmake -B build_tools -S tools/N64Recomp -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build_tools --target N64RecompCLI RSPRecomp
+   ```bash
+   chmod +x WPJ2-Recomp-full-x86_64.AppImage
+   ```
 
-# Generate recompiled sources from ELF (one-time, or when wpj2.j1.toml changes)
-./build_tools/N64Recomp wpj2.j1.toml
-./build_tools/RSPRecomp aspMain.j1.rsp.toml
+2. Put your Japanese `.z64` ROM **in the same folder** as the AppImage.
+3. Run it by double-clicking, or from a terminal:
 
-# Configure and build the game
-cmake -B build -G Ninja -DWPJ2_DEV=ON -DWPJ2_PCH=ON
-cmake --build build --target wpj2
-```
+   ```bash
+   ./WPJ2-Recomp-full-x86_64.AppImage
+   ```
 
-### Run
+   If your system cannot mount AppImages (no FUSE), try
+   `./WPJ2-Recomp-full-x86_64.AppImage --appimage-extract-and-run`.
 
-```bash
-# Place your ROM (one-time — the game will copy it to ~/.config/wpj2-recomp/)
-mkdir -p input
-cp /path/to/your/wpj2.j1.z64 input/
+### Windows
 
-# Run the game
-./build/wpj2
+1. Download the ZIP and extract the **whole archive** into a folder (do not
+   move the `.exe` on its own — it needs the DLLs beside it).
+2. Put your Japanese `.z64` ROM **in the same folder** as
+   `WPJ2-Recompiled.exe`.
+3. Double-click `WPJ2-Recompiled.exe`.
 
-# On Wayland sessions, SDL2 should auto-detect. If you get a Vulkan surface
-# error, try forcing Wayland:
-SDL_VIDEODRIVER=wayland ./build/wpj2
-```
+The first launch may take a few seconds while the game prepares its files.
+
+## ROM detection
+
+On startup the launcher looks for a valid ROM in the folder containing the
+executable (for AppImages, the folder containing the AppImage). If it cannot
+find one, you will see:
+
+> ROM NOT DETECTED, PLEASE PLACE THE ROM ON THE SAME FOLDER AS THE EXECUTABLE
+> **CHECK FOR ROM**
+
+Copy your ROM next to the executable and press the button (or Enter) to check
+again. Once a valid ROM is found, the main launcher menu appears.
+
+## Launcher and settings
+
+The launcher is the first screen you see. Use **Up/Down** to pick a row and
+**Left/Right** to change its value:
+
+| Setting | Options |
+|---|---|
+| Variant | Japanese (original) or English (fan translation) |
+| Fullscreen | On / Off |
+| Integer scaling | On (sharp 4:3 with borders) / Off (fill window) |
+| Audio volume | 0–100 |
+
+Press **Enter** to start the game, **S** to save your settings, and **Esc** to
+quit. Press **G** to generate the English ROM from your Japanese ROM and the
+bundled translation patch; the game also does this automatically when needed.
+
+Japanese and English use separate game files and separate save/config folders,
+so your progress in one language does not affect the other.
+
+## Playing
 
 ### Controls
 
-| N64 Button | Keyboard | Gamepad |
+| N64 button | Keyboard | Gamepad |
 |---|---|---|
 | A | Enter / Space | A |
-| B | Left Shift / Z | B / Y |
-| Z | X | X / L / R |
-| Start | C / Backspace | Start / Back |
-| D-pad | Arrow keys / WASD | D-pad |
-| Analog | — | Left stick |
+| B | Left Shift / Right Shift / Z | B or Y |
+| Z | X | X, L or R |
+| Start | C / Backspace | Start or Back |
+| D-pad | Arrow keys or WASD | D-pad |
+| Analog stick | — | Left stick |
 
-| Hotkey | Action |
+Gamepads are supported through SDL2 and can be plugged in while the game is
+running.
+
+### In-game hotkeys
+
+| Key | Action |
 |---|---|
-| **S** | Toggle integer scaling ↔ stretch to screen |
+| **F9** | Toggle integer scaling ↔ stretch to screen |
 | **F11** | Toggle fullscreen |
 
-## Project Structure
+### Saves
 
-```
-WPJ2-recomp/
-├── src/
-│   ├── main.cpp                      # SDL2 + recomp::start integration
-│   ├── game/
-│   │   ├── register_overlays.cpp     # Static-init registration of section_table
-│   │   ├── manual_stubs.cpp          # Auto-generated stubs for unrecompilable funcs
-│   │   └── generated/                # N64Recomp output (8547 funcs in 53 files)
-│   ├── rsp/
-│   │   ├── rsp_dispatch.cpp          # aspMain for M_AUDTASK, nop for M_GFXTASK
-│   │   └── generated/aspMain.c       # RSPRecomp output (904 labels)
-│   ├── graphics/
-│   │   └── rt64_renderer.cpp         # RT64 Application integration
-│   └── audio_input/
-│       ├── audio.cpp                 # SDL2 audio backend
-│       ├── input.cpp                 # SDL2 keyboard + gamepad
-│       └── controller_pak.cpp        # CPK supplementary stubs
-├── include/
-│   ├── shims.h                       # _recomp function declarations
-│   ├── macros.h                      # N64 type defs
-│   └── generated/wpj2_pch.h          # Precompiled header
-├── lib/
-│   ├── N64ModernRuntime/             # ultramodern + librecomp (submodule)
-│   └── RT64/                         # RT64 renderer (submodule)
-├── tools/
-│   └── N64Recomp/                    # N64Recomp + RSPRecomp (submodule)
-├── decomp/
-│   └── wonder/                       # WPJ2 decompilation (submodule, reference)
-├── docs/                             # Technical documentation (12 files)
-├── scripts/                          # Build automation scripts
-├── wpj2.j1.toml                      # N64Recomp config (165 manual_funcs)
-├── aspMain.j1.rsp.toml               # RSPRecomp config (904 indirect targets)
-├── CMakeLists.txt                    # Build config (ccache, PCH, mold, RT64_STATIC)
-├── WORKLOG.md                        # Development progress log
-└── README.md                         # This file
-```
+The original game uses a Controller Pak. The PC port emulates it automatically;
+you do not need to configure anything. Use the game's own save menu to record
+progress. Save files are stored per language in the launcher's config folder
+under your user profile — keep them if you want to keep your progress, and do
+not mix Japanese and English save folders.
 
-## Build Performance
+## Troubleshooting
 
-| Scenario | Time |
+| Problem | What to try |
 |---|---|
-| Clean build (cold cache) | ~3 min |
-| Clean build (ccache warm) | ~17s |
-| Incremental (1 file) | <1s |
-| Incremental (main.cpp) | ~2.5s |
+| "ROM NOT DETECTED" | Put the Japanese `.z64` beside the executable/AppImage, then press **Check for Rom**. The ROM must be the original Japanese game (MD5 above). |
+| Black screen or Vulkan error | Update your graphics drivers. On Linux Wayland, try `SDL_VIDEODRIVER=wayland` before the executable name. |
+| AppImage will not open | Give it execute permission, or install FUSE. Otherwise try `--appimage-extract-and-run`. |
+| Windows says a DLL is missing | Re-extract the entire ZIP; the `.exe` must stay with its DLL files. |
+| No sound | Check your system volume and the launcher's audio volume setting. |
+| Gamepad not detected | Reconnect the controller; SDL2 supports hot-plug. Keyboard always works. |
+| English text missing or patch error | Keep the bundled `Wpj2e_v1_z64.ips` with the release files and start from an unmodified Japanese ROM. |
+| Saves not appearing | Save from inside the game. Progress is stored per language; check the `jp` / `en` config folder. |
+| Poor performance | Update GPU drivers and close other demanding applications. |
 
-Build optimizations: ccache, mold linker, precompiled headers, Ninja with `-j7`.
+## Legal note
 
-## Documentation
+The source code is released under the [MIT License](LICENSE). This project does
+**not** include or distribute any ROM, game assets, or copyrighted game data.
+You must provide your own legally obtained copy of Wonder Project J2. The
+community English translation patch is included as data only. Software
+recompilation is used here as a preservation technique; respect the rights of
+the original copyright holders.
 
-- [Technical Profile](docs/01-technical-profile.md) — ROM specs, save type, ucode
-- [Methodology](docs/02-methodology.md) — Driver+workers, phase-gated
-- [Toolchain](docs/03-toolchain.md) — N64Recomp, RT64, RSPRecomp
-- [Execution Plan](docs/04-execution-plan.md) — Phases 0–8
-- [Save System](docs/05-save-system.md) — Controller Pak implementation
-- [Risks Register](docs/06-risks.md) — Identified risks
-- [WPJ2 Specifics](docs/07-wpj2-specifics.md) — Game-specific details
-- [Build Performance](docs/12-build-performance.md) — Optimization guide
+## More information
 
-## License & Legal
-
-MIT License — see [LICENSE](LICENSE).
-
-This project does not distribute ROMs or copyrighted assets. Users must supply
-their own legally-obtained ROM of Wonder Project J2. Recompilation is a fair-use
-preservation technique.
-
-## Acknowledgments
-
-- [N64Recomp](https://github.com/N64Recomp/N64Recomp) — recompilation toolchain
-- [RT64](https://github.com/rt64/rt64) — hardware-accelerated N64 renderer
-- [LLONSIT-glitch/wonder](https://github.com/LLONSIT-glitch/wonder) — WPJ2 decompilation
-- [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp) — reference implementation
+- [Building and packaging](docs/BUILDING.md) — source builds, toolchain, release scripts, tests
+- [English translation details](docs/13-english-patch.md)
+- [Launcher details](docs/17-launcher.md)
+- [Technical profile](docs/01-technical-profile.md)
+- [Save system](docs/05-save-system.md)

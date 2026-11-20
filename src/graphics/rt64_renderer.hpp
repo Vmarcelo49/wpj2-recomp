@@ -48,6 +48,9 @@ public:
     // Returns true if integer scaling is now active, false if stretch.
     bool toggle_scaling();
 
+    // Apply scaling mode selected by the launcher before the first frame.
+    void set_scaling(bool integer_scaling);
+
 private:
     struct Impl;
     std::unique_ptr<Impl> pimpl_;

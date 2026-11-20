@@ -75,6 +75,8 @@ struct RT64RendererContext::Impl {
     std::atomic<uint64_t> screen_count{0};
 };
 
+static bool g_launcher_integer_scaling = true;
+
 RT64RendererContext::RT64RendererContext(uint8_t* rdram,
                                          ultramodern::renderer::WindowHandle window_handle,
                                          bool developer_mode)
@@ -156,6 +158,9 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
 
         pimpl_->valid_ = true;
         pimpl_->initialized = true;
+        if (!g_launcher_integer_scaling) {
+            set_scaling(false);
+        }
         fprintf(stderr, "[WPJ2/RT64] Application setup successful\n");
     } else {
         fprintf(stderr, "[WPJ2/RT64] Application setup FAILED (result=%d)\n",
@@ -307,6 +312,23 @@ bool RT64RendererContext::toggle_scaling() {
     return pimpl_->integer_scaling;
 }
 
+void RT64RendererContext::set_scaling(bool integer_scaling) {
+    if (!pimpl_->initialized || !pimpl_->app || pimpl_->integer_scaling == integer_scaling) {
+        pimpl_->integer_scaling = integer_scaling;
+        return;
+    }
+
+    pimpl_->integer_scaling = integer_scaling;
+    if (integer_scaling) {
+        pimpl_->app->userConfig.resolution = RT64::UserConfiguration::Resolution::WindowIntegerScale;
+        pimpl_->app->userConfig.aspectRatio = RT64::UserConfiguration::AspectRatio::Original;
+    } else {
+        pimpl_->app->userConfig.resolution = RT64::UserConfiguration::Resolution::Original;
+        pimpl_->app->userConfig.aspectRatio = RT64::UserConfiguration::AspectRatio::Expand;
+    }
+    pimpl_->app->updateUserConfig(false);
+}
+
 // Global pointer to the active renderer context, set in the constructor.
 // Used by main.cpp's keyboard handler to toggle scaling mode.
 static wpj2::RT64RendererContext* g_active_renderer = nullptr;
@@ -327,6 +349,13 @@ bool toggle_renderer_scaling() {
         return g_active_renderer->toggle_scaling();
     }
     return true;
+}
+
+void set_renderer_scaling(bool integer_scaling) {
+    g_launcher_integer_scaling = integer_scaling;
+    if (g_active_renderer) {
+        g_active_renderer->set_scaling(integer_scaling);
+    }
 }
 
 } // namespace wpj2

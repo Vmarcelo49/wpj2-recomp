@@ -24,6 +24,9 @@ void audio_set_frequency(uint32_t freq);
 void audio_queue_samples(int16_t* samples, size_t count);
 size_t audio_get_frames_remaining();
 
+// Master volume in the range 0..100. Applies to future queued samples.
+void audio_set_volume(int volume);
+
 } // namespace wpj2
 
 #endif // WPJ2_AUDIO_HPP

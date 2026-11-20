@@ -1,0 +1,85 @@
+name: Windows release build
+
+# Manual only. Release builds are expensive; committing or opening a PR must
+# never start one. The requested version must match the checked-in VERSION file.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (must equal VERSION file contents)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify requested version
+        shell: bash
+        run: |
+          expected="$(tr -d '[:space:]' < VERSION)"
+          requested="$(printf '%s' '${{ inputs.version }}' | tr -d '[:space:]')"
+          if [[ -z "$expected" || "$requested" != "$expected" ]]; then
+            echo "Requested '$requested' but VERSION contains '$expected'" >&2
+            exit 1
+          fi
+
+  build:
+    needs: guard
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build Japanese variant and launcher
+        shell: pwsh
+        run: |
+          cmake -S . -B build-jp -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release -DWPJ2_PCH=OFF
+          cmake --build build-jp --target wpj2 wpj2-launcher --parallel
+
+      - name: Build English variant
+        shell: pwsh
+        run: |
+          cmake -S . -B build-en -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release -DWPJ2_PCH=OFF `
+            -DWPJ2_ENGLISH_BUILD=ON `
+            -DWPJ2_GENERATED_DIR="$PWD/src/game/generated_en"
+          cmake --build build-en --target wpj2 --parallel
+
+      - name: Stage release
+        shell: pwsh
+        run: |
+          $v = (Get-Content VERSION).Trim()
+          New-Item -ItemType Directory -Force -Path release/bin, `
+            release/share/wpj2-recomp/patches, `
+            release/share/wpj2-recomp/docs | Out-Null
+          Copy-Item build-jp/wpj2-launcher.exe release/WPJ2-Recompiled.exe
+          Copy-Item build-jp/wpj2-jp.exe release/bin/
+          Copy-Item build-en/wpj2-en.exe release/bin/
+          Copy-Item lib/RT64/src/contrib/mupen64plus-win32-deps/SDL2-2.26.3/lib/x64/SDL2.dll release/
+          Copy-Item lib/RT64/src/contrib/mupen64plus-win32-deps/SDL2-2.26.3/lib/x64/SDL2.dll release/bin/
+          Copy-Item lib/RT64/src/contrib/dxc/bin/x64/dxcompiler.dll release/bin/
+          Copy-Item lib/RT64/src/contrib/dxc/bin/x64/dxil.dll release/bin/
+          Copy-Item lib/RT64/src/contrib/dxc/bin/x64/dxc.exe release/bin/
+          Copy-Item patches/Wpj2e_v1_z64.ips release/share/wpj2-recomp/patches/
+          Copy-Item LICENSE, README.md, VERSION release/share/wpj2-recomp/
+          Copy-Item resources/fonts/Roboto-OFL.txt release/share/wpj2-recomp/
+          Copy-Item docs/* release/share/wpj2-recomp/docs/
+          @{
+            version = $v
+            variants = @('jp','en')
+            translation_patch = 'share/wpj2-recomp/patches/Wpj2e_v1_z64.ips'
+          } | ConvertTo-Json | Set-Content release/RELEASE.json
+          Compress-Archive -Path release/* -DestinationPath "wpj2-windows-x64-$v.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wpj2-windows-x64-${{ inputs.version }}
+          path: wpj2-windows-x64-*.zip
+          if-no-files-found: error

@@ -1,0 +1,7 @@
+# Preserve patch and binary assets verbatim on all platforms.
+*.patch -text
+*.ips -text
+*.bps -text
+*.png -text
+*.ico -text
+*.ttf -text

@@ -1,0 +1,34 @@
+diff --git a/ultramodern/src/events.cpp b/ultramodern/src/events.cpp
+--- a/ultramodern/src/events.cpp
++++ b/ultramodern/src/events.cpp
+@@ -36,6 +36,8 @@ struct UpdateConfigAction {
+
+ using Action = std::variant<SpTaskAction, ScreenUpdateAction, UpdateConfigAction>;
+
++void set_dummy_vi(bool odd);
++
+ struct ViState {
+     const OSViMode* mode;
+     PTR(void) framebuffer;
+@@ -66,6 +68,13 @@ struct {
+         ViState* get_cur_state() {
+             return &states[cur_state];
+         }
++        void ensure_next_mode() {
++            if (get_next_state()->mode == nullptr) {
++                static bool odd = false;
++                set_dummy_vi(odd);
++                odd = !odd;
++            }
++        }
+         void update_vi() {
+             ViState* next_state = get_next_state();
+             const OSViMode* next_mode = next_state->mode;
+@@ -218,6 +227,7 @@ void vi_thread_func() {
+         // Queue a screen update for the graphics thread with the current VI register state.
+         // Doing this before the VI update is equivalent to updating the screen after the previous frame's scanout finished.
+         events_context.action_queue.enqueue(ScreenUpdateAction{ events_context.vi.regs });
++        events_context.vi.ensure_next_mode();
+
+         // Update VI registers and swap VI modes.
+         events_context.vi.update_vi();

@@ -1,0 +1,331 @@
+#!/usr/bin/env python3
+"""Reproducibly generate native EN CPU sources from the verified IPS patch.
+
+This is a fallback for environments without the original decompilation ELF.
+It reconstructs equivalent N64Recomp symbols from the tracked generated code
+and verifies that the resulting ROM matches the independently patched image.
+See docs/13-english-patch.md.
+
+Inputs:
+  - original JP ROM (user-supplied)
+  - tracked N64Recomp config and generated section table (symbol source)
+  - tracked English IPS patch
+
+Outputs (all under --work):
+  - rom/wpj2.en.corrected.z64         corrected English ROM
+  - rom/wpj2.en.corrected.json        hashes and provenance
+  - symbols/wpj2.en.symbols.toml      symbol file for N64Recomp
+  - config/wpj2.en.toml               N64Recomp config for EN generated C
+  - generated_en/                     generated C/C++ sources
+
+The symbol layout is reconstructed from the tracked generated section table,
+not from a patch-script range heuristic. Only function-sized, word-aligned
+executable ranges are emitted; unaligned pseudo-functions (data blobs) are
+left as ROM data and are never JAL targets.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+SECTION_RE = re.compile(
+    r"\{\s*\.rom_addr\s*=\s*(0x[0-9A-Fa-f]+),\s*\.ram_addr\s*=\s*(0x[0-9A-Fa-f]+),\s*"
+    r"\.size\s*=\s*(0x[0-9A-Fa-f]+),\s*\.funcs\s*=\s*(\w+),\s*\.num_funcs"
+)
+FUNC_TABLE_RE = re.compile(r"static\s+FuncEntry\s+(\w+)\[\]\s*=\s*\{(.*?)\n\};", re.S)
+FUNC_ENTRY_RE = re.compile(
+    r"\{\s*\.func\s*=\s*(\w+),\s*\.offset\s*=\s*(0x[0-9A-Fa-f]+),\s*"
+    r"\.rom_size\s*=\s*(0x[0-9A-Fa-f]+)\s*\}"
+)
+RECOMP_FUNC_RE = re.compile(r"RECOMP_FUNC\s+void\s+(\w+)\s*\([^)]*\)\s*\{")
+ADDR_COMMENT_RE = re.compile(r"//\s*0x([0-9A-Fa-f]{8}):")
+JAL_COMMENT_RE = re.compile(r"//\s*0x[0-9A-Fa-f]{8}:\s*jal\s+0x([0-9A-Fa-f]{8})")
+SHIM_CALL_RE = re.compile(r"^\s*(\w+_recomp)\(rdram,\s*ctx\);", re.M)
+
+from patch_utils import count_rle_records, parse_ips
+
+EXPECTED_JP_MD5 = "0ff1f8628d8fe69582db54572d2bea79"
+EXPECTED_EN_SHA256 = "cf0e08c8349291ee5561ba03fa82287a505acece1644588001937b0abc732d31"
+
+
+def apply_ips(rom: bytes, records: list[tuple[int, bytes]]) -> bytes:
+    out = bytearray(rom)
+    end = max(off + len(data) for off, data in records)
+    if end > len(out):
+        out.extend(bytes(end - len(out)))
+    for off, data in records:
+        out[off:off + len(data)] = data
+    return bytes(out)
+
+
+def function_vrams(generated_dir: Path) -> dict[str, int]:
+    mapping: dict[str, int] = {}
+    for path in generated_dir.glob("funcs_*.c"):
+        current: str | None = None
+        for line in path.read_text(errors="replace").splitlines():
+            m = RECOMP_FUNC_RE.search(line)
+            if m:
+                current = m.group(1)
+                continue
+            if current is not None:
+                m = ADDR_COMMENT_RE.search(line)
+                if m:
+                    mapping.setdefault(current, int(m.group(1), 16))
+    return mapping
+
+
+def shim_targets(generated_dir: Path) -> dict[int, str]:
+    """Recover VRAM -> shim-name mappings from the tracked generated C.
+
+    N64Recomp's ELF metadata marked libultra imports as reimplemented shims.
+    A symbol-file rebuild must recreate those names or JALs become bogus
+    'static_N_VRAM' functions compiled from data or cache instructions.
+    """
+    targets: dict[int, str] = {}
+    for path in generated_dir.glob("funcs_*.c"):
+        text = path.read_text(errors="replace")
+        for m in JAL_COMMENT_RE.finditer(text):
+            call = SHIM_CALL_RE.search(text[m.end():m.end() + 240])
+            if call:
+                vram = int(m.group(1), 16)
+                name = call.group(1)
+                if name.endswith("_recomp"):
+                    name = name[:-7]
+                if vram in targets and targets[vram] != name:
+                    raise ValueError(f"conflicting shim mapping at 0x{vram:X}")
+                targets[vram] = name
+    return targets
+
+
+def section_tables(generated_dir: Path) -> list[dict]:
+    text = (generated_dir / "recomp_overlays.inl").read_text()
+    tables = {m.group(1): m.group(2) for m in FUNC_TABLE_RE.finditer(text)}
+    sections = []
+    for m in SECTION_RE.finditer(text):
+        rom_addr, ram_addr, size, table_name = (int(m.group(i), 0) if i < 4 else m.group(i)
+                                                 for i in range(1, 5))
+        entries = []
+        for fm in FUNC_ENTRY_RE.finditer(tables[table_name]):
+            entries.append((fm.group(1), int(fm.group(2), 0), int(fm.group(3), 0)))
+        sections.append({
+            "rom": rom_addr,
+            "vram": ram_addr,
+            "size": size,
+            "funcs": entries,
+        })
+    return sections
+
+
+def toml_symbol_file(sections: list[dict], vram_by_func: dict[str, int],
+                     shims: dict[int, str]) -> str:
+    lines = [
+        "# Generated by generate_en_cpu.py from the tracked recomp section table.",
+        "# Do not reorder: matches N64Recomp's executable section layout.",
+    ]
+    total_funcs = 0
+    skipped = []
+    for section in sections:
+        lines += ["", "[[section]]",
+                  f"rom = {section['rom']}",
+                  f"vram = {section['vram']}",
+                  f"size = {section['size']}",
+                  f"name = \".section_{section['rom']:X}\""]
+        for name, offset, size in sorted(section["funcs"], key=lambda e: e[1]):
+            vram = vram_by_func.get(name)
+            if vram is None:
+                # The entrypoint is generated with a dedicated name.
+                if name == "recomp_entrypoint":
+                    vram = section["vram"] + offset
+                else:
+                    skipped.append((name, "no generated address"))
+                    continue
+            if vram & 3:
+                skipped.append((name, f"unaligned VRAM 0x{vram:X}"))
+                continue
+            if size & 3:
+                skipped.append((name, f"unaligned size 0x{size:X}"))
+                continue
+            lines += ["", "[[section.functions]]",
+                      f"name = \"{name}\"",
+                      f"vram = {vram}",
+                      f"size = {size}"]
+            total_funcs += 1
+
+        # Reimplemented libultra imports live in gaps between real functions.
+        section_vrams = set()
+        for entry_name, _, _ in section["funcs"]:
+            addr = vram_by_func.get(entry_name)
+            if entry_name == "recomp_entrypoint" and addr is None:
+                addr = section["vram"]
+            if addr is not None:
+                section_vrams.add(addr)
+        for vram, name in sorted(shims.items()):
+            if not (section["vram"] <= vram < section["vram"] + section["size"]):
+                continue
+            if vram in section_vrams:
+                raise ValueError(f"shim 0x{vram:X} overlaps an existing function")
+            lines += ["", "[[section.functions]]",
+                      f"name = \"{name}\"",
+                      f"vram = {vram}",
+                      "size = 4"]
+            total_funcs += 1
+    if skipped:
+        print(f"Skipped {len(skipped)} non-executable pseudo-functions:", file=sys.stderr)
+        for name, why in skipped[:10]:
+            print(f"  {name}: {why}", file=sys.stderr)
+    print(f"Emitted {total_funcs} executable functions", file=sys.stderr)
+    return "\n".join(lines) + "\n"
+
+
+def changed_words(jp_rom: bytes, en_rom: bytes, sections: list[dict],
+                  vram_by_func: dict[str, int]) -> dict[str, list[int]]:
+    """Map each changed 4-byte word in executable sections to its function."""
+    ranges = []
+    for section in sections:
+        for name, offset, size in section["funcs"]:
+            vram = vram_by_func.get(name)
+            if vram is None and name == "recomp_entrypoint":
+                vram = section["vram"] + offset
+            if vram is None or vram & 3 or size & 3:
+                continue
+            rom_start = section["rom"] + offset
+            rom_end = rom_start + size
+            ranges.append((rom_start, rom_end, name))
+
+    def find_func(rom_addr: int) -> str | None:
+        for start, end, name in ranges:
+            if start <= rom_addr < end:
+                return name
+        return None
+
+    changes: dict[str, list[int]] = {}
+    limit = min(len(jp_rom), len(en_rom))
+    # Only scan executable sections (word aligned).
+    for section in sections:
+        for addr in range(section["rom"], min(section["rom"] + section["size"], limit), 4):
+            if jp_rom[addr:addr + 4] == en_rom[addr:addr + 4]:
+                continue
+            name = find_func(addr)
+            if name:
+                changes.setdefault(name, []).append(addr)
+    return changes
+
+
+def normalize_generated(generated: Path) -> None:
+    """Strip generator whitespace so checked-in output is diff-clean."""
+    for path in generated.iterdir():
+        if not path.is_file():
+            continue
+        text = path.read_text(errors="replace")
+        lines = [line.rstrip() for line in text.splitlines()]
+        while lines and not lines[-1]:
+            lines.pop()
+        path.write_text("\n".join(lines) + "\n")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    default_repo = Path(__file__).resolve().parents[1]
+    parser.add_argument("--repo", type=Path, default=default_repo)
+    parser.add_argument("--jp-rom", type=Path, required=True,
+                        help="original Japanese .z64 ROM")
+    parser.add_argument("--en-rom", type=Path, default=None,
+                        help="canonical verified EN ROM; defaults to reference/english.z64")
+    parser.add_argument("--work", type=Path, default=default_repo.parent / "wpj2-work" / "cpu")
+    parser.add_argument("--skip-recomp", action="store_true")
+    args = parser.parse_args()
+
+    work = args.work
+    for sub in ("rom", "symbols", "config", "generated_en", "reports"):
+        (work / sub).mkdir(parents=True, exist_ok=True)
+
+    records = parse_ips((args.repo / "patches/Wpj2e_v1_z64.ips").read_bytes())
+    jp_rom = args.jp_rom.read_bytes()
+    if hashlib.md5(jp_rom).hexdigest() != EXPECTED_JP_MD5:
+        raise ValueError("expected the original Japanese ROM "
+                         "(MD5 0ff1f8628d8fe69582db54572d2bea79)")
+    rebuilt_en = apply_ips(jp_rom, records)
+    if hashlib.sha256(rebuilt_en).hexdigest() != EXPECTED_EN_SHA256:
+        raise ValueError("IPS rebuild does not match the canonical English image")
+    canonical = args.en_rom or (work.parent / "reference/english.z64")
+    if canonical.exists():
+        en_rom = canonical.read_bytes()
+        if en_rom != rebuilt_en:
+            raise ValueError("canonical EN ROM does not match independent IPS rebuild")
+        en_path = canonical
+    else:
+        en_rom = rebuilt_en
+        en_path = work / "rom/wpj2.en.corrected.z64"
+        en_path.write_bytes(en_rom)
+
+    hashes = {
+        "jp_md5": hashlib.md5(jp_rom).hexdigest(),
+        "en_md5": hashlib.md5(en_rom).hexdigest(),
+        "en_sha256": hashlib.sha256(en_rom).hexdigest(),
+        "en_size": len(en_rom),
+        "en_ips_records": len(records),
+        "en_rle_records": count_rle_records((args.repo / "patches/Wpj2e_v1_z64.ips").read_bytes()),
+        "en_path": str(en_path),
+    }
+    (work / "rom/wpj2.en.corrected.json").write_text(json.dumps(hashes, indent=2) + "\n")
+
+    vram_by_func = function_vrams(args.repo / "src/game/generated")
+    sections = section_tables(args.repo / "src/game/generated")
+    raw_shims = shim_targets(args.repo / "src/game/generated")
+    # Addresses with a generated function are real code (e.g. the game's own
+    # vsprintf), not imported shims; those JALs already resolve correctly.
+    generated_vrams = set(vram_by_func.values())
+    shims = {vram: name for vram, name in raw_shims.items() if vram not in generated_vrams}
+    print(f"Recovered {len(shims)} imported shims from tracked generated C", file=sys.stderr)
+    symbol_text = toml_symbol_file(sections, vram_by_func, shims)
+    sym_path = work / "symbols/wpj2.en.symbols.toml"
+    sym_path.write_text(symbol_text)
+
+    changes = changed_words(jp_rom, en_rom, sections, vram_by_func)
+    report = {
+        "changed_executable_words": sum(len(v) for v in changes.values()),
+        "changed_functions": len(changes),
+        "functions": {k: [hex(x) for x in v] for k, v in sorted(changes.items())},
+    }
+    (work / "reports/executable_changes.json").write_text(json.dumps(report, indent=2) + "\n")
+
+    src_config = (args.repo / "wpj2.j1.toml").read_text()
+    config = src_config.replace('elf_path = "tools/input/wonderprojectj2.jp.elf"',
+                                'elf_path = ""')
+    config = config.replace('symbols_file_path = ""',
+                            f'symbols_file_path = "{sym_path}"')
+    config = config.replace('rom_file_path = ""', f'rom_file_path = "{en_path}"')
+    config = config.replace('output_func_path = "src/game/generated/"',
+                            f'output_func_path = "{work / "generated_en"}/"')
+    # ELF-only data-symbol names do not exist in symbol-file mode.
+    config = re.sub(r'ignored = \[[^\]]*\]', 'ignored = []', config, count=1)
+    # Shim names are matched by N64Recomp's hardcoded reimplemented/ignored
+    # symbol lists, which rename them to *_recomp automatically. Adding them
+    # to the config's stubs array would make the post-rename existence check
+    # fail, so leave stubs empty.
+    config_path = work / "config/wpj2.en.toml"
+    config_path.write_text(config)
+
+    print(json.dumps(hashes, indent=2))
+    print(f"Changed executable words: {report['changed_executable_words']} in "
+          f"{report['changed_functions']} functions")
+    print(f"Report: {work / 'reports/executable_changes.json'}")
+
+    if not args.skip_recomp:
+        generated = work / "generated_en"
+        if generated.exists():
+            shutil.rmtree(generated)
+        generated.mkdir(parents=True)
+        subprocess.run([str(args.repo / "build_tools/N64Recomp"), str(config_path)], check=True)
+        normalize_generated(generated)
+        print(f"Generated EN CPU sources: {generated}")
+
+
+if __name__ == "__main__":
+    main()

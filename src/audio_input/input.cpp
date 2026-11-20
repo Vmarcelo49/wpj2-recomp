@@ -6,18 +6,14 @@
 
 #include <SDL2/SDL.h>
 
+#include <cmath>
 #include <cstdio>
-#include <cstring>
 #include <mutex>
 
 namespace wpj2 {
 
 namespace {
-    // N64 button bitmask (matches the libultra ordering used by ultramodern):
-    // bit 15: A          bit 14: B
-    // bit 13: Z          bit 12: Start
-    // bit 11: U  bit 10: D  bit 9: L  bit 8: R  (D-pad)
-    // bits 7..0: C-pad + reserved (C-up=0x20, C-down=0x10, C-left=0x08, C-right=0x04)
+    // N64/libultra controller bits from os_cont.h.
     constexpr uint16_t BTN_A      = 0x8000;
     constexpr uint16_t BTN_B      = 0x4000;
     constexpr uint16_t BTN_Z      = 0x2000;
@@ -26,6 +22,12 @@ namespace {
     constexpr uint16_t BTN_DD     = 0x0400;
     constexpr uint16_t BTN_DL     = 0x0200;
     constexpr uint16_t BTN_DR     = 0x0100;
+    constexpr uint16_t BTN_L      = 0x0020;
+    constexpr uint16_t BTN_R      = 0x0010;
+    constexpr uint16_t BTN_CU     = 0x0008;
+    constexpr uint16_t BTN_CD     = 0x0004;
+    constexpr uint16_t BTN_CL     = 0x0002;
+    constexpr uint16_t BTN_CR     = 0x0001;
 
     std::mutex g_input_mtx;
     SDL_GameController* g_pads[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -41,6 +43,12 @@ namespace {
         if (kb[SDL_SCANCODE_DOWN]  || kb[SDL_SCANCODE_S]) b |= BTN_DD;
         if (kb[SDL_SCANCODE_LEFT]  || kb[SDL_SCANCODE_A]) b |= BTN_DL;
         if (kb[SDL_SCANCODE_RIGHT] || kb[SDL_SCANCODE_D]) b |= BTN_DR;
+        if (kb[SDL_SCANCODE_Q])                            b |= BTN_L;
+        if (kb[SDL_SCANCODE_E])                            b |= BTN_R;
+        if (kb[SDL_SCANCODE_I])                            b |= BTN_CU;
+        if (kb[SDL_SCANCODE_K])                            b |= BTN_CD;
+        if (kb[SDL_SCANCODE_J])                            b |= BTN_CL;
+        if (kb[SDL_SCANCODE_L])                            b |= BTN_CR;
         return b;
     }
 
@@ -56,17 +64,43 @@ namespace {
         if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_DOWN))      b |= BTN_DD;
         if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_LEFT))      b |= BTN_DL;
         if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))     b |= BTN_DR;
-        if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))   b |= BTN_Z;
-        if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER))  b |= BTN_Z;
+        if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))   b |= BTN_L;
+        if (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER))  b |= BTN_R;
         return b;
+    }
+
+    // SDL reports -32768..32767 with negative Y meaning "stick pushed up".
+    // N64 OSContPad uses +127 for up. Invert Y and discard small drift, then
+    // rescale the remaining range so full deflection still reaches 1.0.
+    constexpr float ANALOG_DEADZONE = 0.12f;
+
+    float apply_deadzone(float value) {
+        if (std::fabs(value) < ANALOG_DEADZONE) return 0.0f;
+        const float sign = value < 0.0f ? -1.0f : 1.0f;
+        return sign * (std::fabs(value) - ANALOG_DEADZONE) / (1.0f - ANALOG_DEADZONE);
     }
 
     void gamepad_analog(SDL_GameController* pad, float* x, float* y) {
         Sint16 sx = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTX);
         Sint16 sy = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTY);
         constexpr float INV = 1.0f / 32768.0f;
-        *x = sx * INV;
-        *y = sy * INV;
+        *x = apply_deadzone(sx * INV);
+        *y = apply_deadzone(-sy * INV);
+    }
+
+    // Caller must hold g_input_mtx.
+    ultramodern::input::connected_device_info_t device_info_locked(int controller_num) {
+        if (controller_num < 0 || controller_num >= 4) {
+            return {ultramodern::input::Device::None, ultramodern::input::Pak::None};
+        }
+        // WPJ2 needs a Controller Pak before it will initialise PFS. The
+        // runtime sets CONT_CARD_ON for any Pak != None; osPfs* filesystem
+        // operations are handled by our own Controller Pak shims.
+        if (controller_num == 0 || g_pads[controller_num] != nullptr) {
+            return {ultramodern::input::Device::Controller,
+                    ultramodern::input::Pak::ControllerPak};
+        }
+        return {ultramodern::input::Device::None, ultramodern::input::Pak::None};
     }
 
     // Track which joystick indices are already assigned to avoid opening
@@ -153,8 +187,14 @@ bool input_get(int controller_num, uint16_t* buttons, float* x, float* y) {
 }
 
 void input_set_rumble(int controller_num, bool rumble) {
-    if (controller_num < 0 || controller_num >= 4) return;
     std::lock_guard<std::mutex> lock(g_input_mtx);
+    // WPJ2 uses a synthetic Controller Pak, not physical rumble hardware.
+    // Only vibrate when a real RumblePak is reported, so osMotorStart can
+    // never make the emulated Pak rumble by accident.
+    if (device_info_locked(controller_num).connected_pak !=
+        ultramodern::input::Pak::RumblePak) {
+        return;
+    }
     if (g_pads[controller_num] == nullptr) return;
     SDL_GameControllerRumble(g_pads[controller_num],
                              rumble ? 0xFFFF : 0,
@@ -163,17 +203,8 @@ void input_set_rumble(int controller_num, bool rumble) {
 }
 
 ultramodern::input::connected_device_info_t input_get_connected_device_info(int controller_num) {
-    if (controller_num < 0 || controller_num >= 4) {
-        return {ultramodern::input::Device::None, ultramodern::input::Pak::None};
-    }
-    // WPJ2 uses Controller Pak (MPK) for saves. ultramodern's input::Pak
-    // enum doesn't expose ControllerPak yet, so we report None here —
-    // the MPK save path is handled separately by librecomp.
     std::lock_guard<std::mutex> lock(g_input_mtx);
-    if (controller_num == 0 || g_pads[controller_num] != nullptr) {
-        return {ultramodern::input::Device::Controller, ultramodern::input::Pak::None};
-    }
-    return {ultramodern::input::Device::None, ultramodern::input::Pak::None};
+    return device_info_locked(controller_num);
 }
 
 } // namespace wpj2
