@@ -34,6 +34,11 @@
 #include <SDL.h>
 #include <SDL_vulkan.h>
 
+#if defined(_WIN32)
+#include <SDL_syswm.h>
+#include <windows.h>
+#endif
+
 // ultramodern / librecomp / recomp headers
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/renderer_context.hpp"
@@ -348,7 +353,20 @@ int main(int argc, char** argv) {
     // ---- 4. Build the configuration and start recomp ----
     recomp::Configuration cfg{};
     cfg.project_version = recomp::Version{0, 1, 0, ""};
-    cfg.window_handle   = g_sdl_window; // ultramodern's WindowHandle is SDL_Window* on Linux
+#if defined(_WIN32)
+    SDL_SysWMinfo wm_info;
+    SDL_VERSION(&wm_info.version);
+    if (!SDL_GetWindowWMInfo(g_sdl_window, &wm_info)) {
+        fprintf(stderr, "SDL_GetWindowWMInfo failed: %s\n", SDL_GetError());
+        SDL_DestroyWindow(g_sdl_window);
+        SDL_Quit();
+        return EXIT_FAILURE;
+    }
+    cfg.window_handle = ultramodern::renderer::WindowHandle{
+        wm_info.info.win.window, GetCurrentThreadId()};
+#else
+    cfg.window_handle = g_sdl_window; // Linux WindowHandle is SDL_Window*
+#endif
 
     // RSP microcode dispatcher
     cfg.rsp_callbacks.get_rsp_microcode = wpj2::get_rsp_microcode;

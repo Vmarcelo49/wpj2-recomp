@@ -232,7 +232,7 @@ endif()
 set(WPJ2_RUNTIME_PAK_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/patches/N64ModernRuntime/controller-pak-device.patch")
 set(WPJ2_RUNTIME_INPUT_HEADER "${WPJ2_RUNTIME_DIR}/ultramodern/include/ultramodern/input.hpp")
 file(READ "${WPJ2_RUNTIME_INPUT_HEADER}" wpj2_runtime_input_header)
-string(FIND "${wpj2_runtime_input_header}" "ControllerPak," wpj2_pak_patch_marker)
+string(FIND "${wpj2_runtime_input_header}" "            ControllerPak," wpj2_pak_patch_marker)
 if(wpj2_pak_patch_marker EQUAL -1)
     execute_process(
         COMMAND git -C "${WPJ2_RUNTIME_DIR}" apply --check "${WPJ2_RUNTIME_PAK_PATCH}"

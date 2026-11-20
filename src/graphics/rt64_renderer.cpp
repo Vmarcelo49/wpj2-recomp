@@ -18,6 +18,11 @@
 
 #include <SDL.h>
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <objbase.h>
+#endif
+
 #include <cstdio>
 #include <cstring>
 #include <atomic>
@@ -86,8 +91,13 @@ RT64RendererContext::RT64RendererContext(uint8_t* rdram,
     pimpl_->window = window_handle;  // On Linux, WindowHandle = SDL_Window*
     pimpl_->developer_mode = developer_mode;
 
+#if defined(_WIN32)
+    fprintf(stderr, "[WPJ2/RT64] Creating RT64 Application (rdram=%p, hwnd=%p)\n",
+            (void*)rdram, (void*)window_handle.window);
+#else
     fprintf(stderr, "[WPJ2/RT64] Creating RT64 Application (rdram=%p, window=%p)\n",
             (void*)rdram, (void*)window_handle);
+#endif
 
     // Build the RT64 Core struct
     RT64::Application::Core core{};
