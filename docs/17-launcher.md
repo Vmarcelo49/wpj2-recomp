@@ -74,16 +74,15 @@ for Rom" button. Clicking the button or pressing Enter repeats the search.
 When a ROM is found, the SDL UI has one keyboard-driven screen:
 
 - Up/Down: select a row.
-- Left/Right: change variant, fullscreen, integer scaling, or volume.
+- Left/Right: change language, fullscreen, integer scaling, volume, or graphics API.
 - Enter: validate ROM and launch the matching executable.
-- G: generate the canonical English ROM from the Japanese ROM plus the IPS.
 - S: save the INI config.
 - Esc: quit.
 
 A no-GUI path is available for scripts and testing:
 
 ```bash
-./build/wpj2-launcher --no-gui --dry-run --variant en --make-en \
+./build/wpj2-launcher --no-gui --dry-run --variant en \
   --jp-rom /path/to/wpj2.j1.z64 \
   --en-rom ./input/wpj2.en.z64 \
   --game-en ./build-en/wpj2
@@ -152,8 +151,8 @@ The launcher does **not** trust a stale `input/wpj2.en.z64`:
    (`e43c9765 05b1c1be`).
 2. Verify the English ROM size and CIC6102 checksum
    (`4f1e88f7 4a5a3f96`).
-3. If the English ROM is missing/invalid and `--make-en` (or the UI's G key)
-   is used, apply the tracked IPS with the correct RLE order: `count` is the
+3. If the English ROM is missing/invalid, applying the IPS is automatic when
+   English is launched. The tracked IPS uses the correct RLE order: `count` is
    two-byte big-endian field, `value` is the following byte.
 4. Reject patches whose output is not exactly 8,912,896 bytes, and re-verify
    the generated image before launching.

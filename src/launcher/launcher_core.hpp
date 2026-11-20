@@ -66,7 +66,7 @@ bool apply_ips(const std::filesystem::path& jp_rom,
 // or missing English ROM is rebuilt from jp_rom plus the tracked IPS patch.
 bool ensure_en_rom(const Config& config, bool generate_missing, std::string* error = nullptr);
 
-LaunchPlan make_plan(const Config& config, bool generate_en, std::string* error = nullptr);
+LaunchPlan make_plan(const Config& config, std::string* error = nullptr);
 std::string describe_plan(const LaunchPlan& plan);
 int launch(const LaunchPlan& plan, std::string* error = nullptr);
 

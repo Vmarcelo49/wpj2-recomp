@@ -557,13 +557,9 @@ bool apply_ips(const std::filesystem::path& jp_rom,
     return true;
 }
 
-bool ensure_en_rom(const Config& config, bool generate_missing, std::string* error) {
+bool ensure_en_rom(const Config& config, std::string* error) {
     if (verify_en_rom(config.en_rom, nullptr)) {
         return true;
-    }
-    if (!generate_missing) {
-        set_error(error, "English ROM is invalid; use --make-en or the Generate button");
-        return false;
     }
     const auto parent = config.en_rom.parent_path();
     if (!parent.empty()) {
@@ -577,7 +573,7 @@ bool ensure_en_rom(const Config& config, bool generate_missing, std::string* err
     return apply_ips(config.jp_rom, config.ips_patch, config.en_rom, error);
 }
 
-LaunchPlan make_plan(const Config& config, bool generate_en, std::string* error) {
+LaunchPlan make_plan(const Config& config, std::string* error) {
     LaunchPlan plan;
     plan.variant = config.variant;
 
@@ -588,7 +584,7 @@ LaunchPlan make_plan(const Config& config, bool generate_en, std::string* error)
         rom = std::filesystem::absolute(config.jp_rom);
         executable = config.game_jp;
     } else {
-        if (!ensure_en_rom(config, generate_en, error)) return plan;
+        if (!ensure_en_rom(config, error)) return plan;
         rom = std::filesystem::absolute(config.en_rom);
         executable = config.game_en;
     }

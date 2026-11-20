@@ -78,15 +78,15 @@ The launcher is the first screen you see. Use **Up/Down** to pick a row and
 
 | Setting | Options |
 |---|---|
-| Variant | Japanese (original) or English (fan translation) |
+| Language | Japanese (original) or English (fan translation) |
 | Fullscreen | On / Off |
 | Integer scaling | On (sharp 4:3 with borders) / Off (fill window) |
 | Audio volume | 0–100 |
 | Graphics API | Auto, D3D12, or Vulkan |
 
 Press **Enter** to start the game, **S** to save your settings, and **Esc** to
-quit. Press **G** to generate the English ROM from your Japanese ROM and the
-bundled translation patch; the game also does this automatically when needed.
+quit. Selecting English automatically creates the translated ROM from your
+Japanese ROM and the bundled patch.
 
 Japanese and English use separate game files and separate save/config folders,
 so your progress in one language does not affect the other.

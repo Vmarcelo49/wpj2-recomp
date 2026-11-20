@@ -80,7 +80,7 @@ void draw_text(SDL_Renderer* renderer, SDL_Texture* font_texture,
 
 std::string status_for_paths(const Config& config) {
     std::string jp = wpj2_launcher::verify_jp_rom(config.jp_rom, nullptr) ? "OK" : "INVALID";
-    std::string en = wpj2_launcher::verify_en_rom(config.en_rom, nullptr) ? "OK" : "GENERATE";
+    std::string en = wpj2_launcher::verify_en_rom(config.en_rom, nullptr) ? "OK" : "AUTO";
     std::string game = config.variant == Variant::En ? config.game_en.string() : config.game_jp.string();
     std::error_code ec;
     std::string game_status = std::filesystem::exists(game, ec) ? "OK" : "MISSING";
@@ -141,15 +141,14 @@ void render_ui(SDL_Renderer* renderer, SDL_Texture* font_texture,
     draw_text(renderer, font_texture, 40, 30, "WONDER PROJECT J2 LAUNCHER", 2, heading);
     draw_text(renderer, font_texture, 40, 86, status_for_paths(config), 1, muted);
 
-    const std::array<std::string, 8> labels = {
-        "VARIANT: " + std::string(wpj2_launcher::variant_name(config.variant) == "jp" ? "JAPANESE" : "ENGLISH"),
+    const std::array<std::string, 7> labels = {
+        "LANGUAGE: " + std::string(wpj2_launcher::variant_name(config.variant) == "jp" ? "JAPANESE" : "ENGLISH"),
         std::string("FULLSCREEN: ") + (config.fullscreen ? "ON" : "OFF"),
         std::string("INTEGER SCALING: ") + (config.integer_scaling ? "ON" : "OFF"),
         "AUDIO VOLUME: " + std::to_string(config.audio_volume),
         "GRAPHICS: " + config.graphics_api,
-        "ENTER - LAUNCH",
-        "G - GENERATE EN ROM",
         "S - SAVE / ESC - QUIT",
+        "ENTER - LAUNCH",
     };
 
     for (int i = 0; i < static_cast<int>(labels.size()); ++i) {
@@ -230,10 +229,10 @@ int run_ui(const std::filesystem::path& config_path, Config config) {
                         running = false;
                         break;
                     case SDLK_UP:
-                        selected = (selected + 7) % 8;
+                        selected = (selected + 6) % 7;
                         break;
                     case SDLK_DOWN:
-                        selected = (selected + 1) % 8;
+                        selected = (selected + 1) % 7;
                         break;
                     case SDLK_LEFT:
                     case SDLK_RIGHT: {
@@ -259,7 +258,7 @@ int run_ui(const std::filesystem::path& config_path, Config config) {
                     }
                     case SDLK_RETURN: {
                         std::string error;
-                        const auto plan = wpj2_launcher::make_plan(config, true, &error);
+                        const auto plan = wpj2_launcher::make_plan(config, &error);
                         if (!error.empty()) {
                             status = error;
                         } else {
@@ -267,15 +266,6 @@ int run_ui(const std::filesystem::path& config_path, Config config) {
                             SDL_DestroyWindow(window);
                             SDL_Quit();
                             return wpj2_launcher::launch(plan, &error);
-                        }
-                        break;
-                    }
-                    case SDLK_g: {
-                        std::string error;
-                        if (wpj2_launcher::ensure_en_rom(config, true, &error)) {
-                            status = "EN ROM READY";
-                        } else {
-                            status = error;
                         }
                         break;
                     }
@@ -320,7 +310,6 @@ void print_help() {
         "  --stretch           Request stretched scaling\n"
         "  --volume N          Audio volume 0..100\n"
         "  --graphics API      Auto, D3D12, or Vulkan\n"
-        "  --make-en           Generate canonical EN ROM from JP + IPS when needed\n"
         "  --dry-run           Print the launch plan and exit\n"
         "  --save-config       Save overrides to the config file\n"
         "  --no-gui            Use the command-line flow instead of SDL UI\n"
@@ -365,7 +354,6 @@ int main(int argc, char** argv) {
     bool no_gui = false;
     bool dry_run = false;
     bool save_config = false;
-    bool generate_en = false;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -383,10 +371,6 @@ int main(int argc, char** argv) {
         }
         if (arg == "--save-config") {
             save_config = true;
-            continue;
-        }
-        if (arg == "--make-en") {
-            generate_en = true;
             continue;
         }
         if (arg == "--fullscreen") {
@@ -453,7 +437,7 @@ int main(int argc, char** argv) {
 
     if (dry_run || no_gui) {
         std::string error;
-        const auto plan = wpj2_launcher::make_plan(config, generate_en, &error);
+        const auto plan = wpj2_launcher::make_plan(config, &error);
         if (!error.empty()) {
             std::cerr << "Cannot prepare launch: " << error << '\n';
             return 1;

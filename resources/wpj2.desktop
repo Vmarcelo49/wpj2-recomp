@@ -11,4 +11,4 @@ Categories=Game;Simulation;
 MimeType=application/x-n64-rom;
 StartupWMClass=wpj2
 X-AppImage-Name=wpj2-recomp
-X-AppImage-Version=0.1.0-rc2
+X-AppImage-Version=0.1.0-rc3
